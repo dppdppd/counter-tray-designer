@@ -23,18 +23,18 @@ g_magnet_distance_from_edge = 6;
 
 g_fill_margin = 1;
 
-tray_padding_min = 1;
+tray_min_padding = 1;
 //counter_padding_width = 2;
 //counter_padding_height = 2 + counter_size/4;
 
 counter_outer_width = counter_size + 2*counter_margin_x;
 counter_outer_height = counter_size + 2*counter_margin_y;
 
-num_counters_x = floor(( g_tray_width - 2 * tray_padding_min- 2*counter_margin_y ) / counter_outer_width );
+num_counters_x = floor(( g_tray_width - 2 * tray_min_padding- 2*counter_margin_y ) / counter_outer_width );
 tray_inner_width = num_counters_x * counter_outer_width + counter_margin_x*2;
 tray_padding_width =  ( g_tray_width - tray_inner_width ) / 2;
 
-num_counters_y = floor((g_tray_height - 2 * tray_padding_min - 2*counter_margin_y ) / counter_outer_height );
+num_counters_y = floor((g_tray_height - 2 * tray_min_padding - 2*counter_margin_y ) / counter_outer_height );
 tray_inner_height = num_counters_y * counter_outer_height + counter_margin_y*2;
 tray_padding_height =  ( g_tray_height - tray_inner_height ) / 2;
 
