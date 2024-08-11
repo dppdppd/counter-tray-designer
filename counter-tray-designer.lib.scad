@@ -84,23 +84,24 @@ module Main( DATA = DATA)
     make_lid = find_value( DATA, G_MAKE_LID_B, default = true);
     frame_style = find_value( DATA, G_FRAME_STYLE_N, default = 1);
 
+    no_magnets = frame_style == 4;
+
     // todo: add this to the KV
     // note that turning it on makes the tray more aesthetic but that you can't mix and match sizes because they won't line up
     MOVE_NUBS_TO_COUNTER_POSITIONS = false;
 
-    magnet_diameter = frame_style < 3 ? 6.2 : 12.2;
-    magnet_wall_min = frame_style < 3 ? 0.2 : !MOVE_NUBS_TO_COUNTER_POSITIONS ? 1 : (get_counter_size_outer( 0 ).x - magnet_diameter )/2;
+    magnet_diameter = frame_style < 3 ? 6.2 : 10.2;
+    magnet_wall_min = frame_style < 3 ? 0.2 : !MOVE_NUBS_TO_COUNTER_POSITIONS ? 1.2 : (get_counter_size_outer( 0 ).x - magnet_diameter )/2;
     magnet_outer_diameter = magnet_diameter + magnet_wall_min * 2;
     magnet_nub_max_spacing = 100;
 
     magnet_depth = 1.4;
-    magnet_lid_depth = 2.4;
     magnet_distance_from_edge = [(magnet_outer_diameter)/2, (magnet_outer_diameter)/2 ];
 
     // we don't allow a min y padding of less than required for a magnet, but only in styles 1 and 2
     tray_min_padding_raw = find_value( DATA, G_MIN_PADDING_XY, default = [magnet_outer_diameter,1]);
     _padding_min_x = tray_min_padding_raw.x >= magnet_outer_diameter ? tray_min_padding_raw.x : magnet_outer_diameter;
-    tray_padding = [ frame_style == 3 ? tray_min_padding_raw.x : _padding_min_x, tray_min_padding_raw.y ];
+    tray_padding = [ frame_style >= 3 ? tray_min_padding_raw.x : _padding_min_x, tray_min_padding_raw.y ];
 
     lid_depth = find_value( DATA, G_LID_DEPTH_N, default = 2.6);
     function get_counter_margins_default() = find_value( DATA, COUNTER_MARGINS_XY, default = [0.5,0.5]);
@@ -215,17 +216,17 @@ module Main( DATA = DATA)
 
                 if ( frame_style == 1 )
                     MakeBorderPadding();
-                else
+                else if ( !no_magnets )
                     MakeBothSidesMagnetNubs();
             }
 
             union() {
                 if ( frame_style == 1 )
                     MakeBorderPaddingMagnetHoles();
-                else
+                else if ( !no_magnets )
                     MakeBothSidesMagnetNubHoles();
 
-                if ( !g_make_svg && ( frame_style != 3 ) )
+                if ( !g_make_svg && ( frame_style < 3 ) )
                     MakeNotches();
             }
         }
@@ -239,12 +240,12 @@ module Main( DATA = DATA)
             MakeLid();
 
             union() {
-                if ( frame_style == 1 )
+                if ( !no_magnets && frame_style == 1 )
                     MakeBorderPaddingMagnetHoles();
-                else
+                else if ( !no_magnets )
                     MakeBothSidesMagnetNubHoles();
 
-                if ( !g_make_svg && ( frame_style != 3 ) )
+                if ( !g_make_svg && ( frame_style < 3 ) )
                     MakeNotches();
             }
         }
@@ -271,35 +272,25 @@ module Main( DATA = DATA)
         }
     }
 
-    module MakeMagnetSlots( body_depth, is_lid = false )
+    module MakeMagnetSlots( body_depth )
     {
 
         function IsTrayDeep() = tray_size_3d.z > ( 2 * magnet_depth + 0.2 );
 
-        if ( !is_lid )
+        MakeOneSetOfMagnetSlots();
+
+        if ( IsTrayDeep() )
         {
+            translate([0, 0, tray_size_3d.z - magnet_depth])
             MakeOneSetOfMagnetSlots();
-
-            if ( IsTrayDeep() )
-            {
-                translate([0, 0, tray_size_3d.z - magnet_depth])
-                MakeOneSetOfMagnetSlots();
-            }
         }
-        else
-        {
-            translate([0, 0, lid_depth - magnet_lid_depth])
-            MakeOneSetOfMagnetSlots();            
-        }
-
+        
 
         module MakeOneSetOfMagnetSlots()
         {
             dimensions = [tray_size_3d.x, tray_size_3d.y, 0];
             PlaceFourMirroredOnXY( dimensions )
             MakeSingleMagnetSlot();
-
-
         }
     }
 
@@ -444,23 +435,49 @@ module Main( DATA = DATA)
     
     module MakeOneSetMagnetNubHoles()
     {
+        module ReleaseGap()
+        {
+            release_tool_fraction = 6;
+
+            translate( [magnet_outer_diameter/2,magnet_outer_diameter/2,0])
+            {
+                cube( [ magnet_outer_diameter, magnet_outer_diameter/release_tool_fraction, magnet_depth*2], center = true );  
+
+                *rotate(a=[0,0,90])
+                cube( [ magnet_outer_diameter, magnet_outer_diameter/release_tool_fraction, magnet_depth*2], center = true );  
+            }
+        }
+
         PlaceNubChildren()
         {
+            CUT_THROUGH = false;
+
             translate( [magnet_outer_diameter/2,magnet_outer_diameter/2,magnet_depth/2])
             cylinder( h = magnet_depth, d = magnet_diameter, center = true );
 
+            if ( !CUT_THROUGH )
+            ReleaseGap();
+
             if ( tray_requires_double_magnets() )
             {
-                translate( [magnet_outer_diameter/2,magnet_outer_diameter/2,magnet_depth/2])
-                translate([0, 0, tray_size_3d.z - magnet_depth])
-                cylinder( h = magnet_depth, d = magnet_diameter, center = true );
+                translate([0, 0, tray_size_3d.z - magnet_depth]) {
+                    translate( [magnet_outer_diameter/2,magnet_outer_diameter/2,magnet_depth/2])
+                    cylinder( h = magnet_depth, d = magnet_diameter, center = true );
+
+                    if ( !CUT_THROUGH )
+                    ReleaseGap();
+                }
             }
+
+            if ( CUT_THROUGH )
+            translate( [magnet_outer_diameter/4,magnet_outer_diameter/2,tray_size_3d.z/2])
+            cube( [ magnet_outer_diameter/2, magnet_outer_diameter/release_tool_fraction, tray_size_3d.z], center = true );
         }
     }
 
     module MakeBorderPaddingMagnetHoles()
     {
-        MakeMagnetSlots( body_depth = tray_size_3d.z, is_lid = false );
+        MakeMagnetSlots( body_depth = tray_size_3d.z );
     }
 
     module MakeBorderPadding()
@@ -488,60 +505,42 @@ module Main( DATA = DATA)
                         }
                     }
                 }
-        
+                
                 // top/bottom padding
-                if ( 1 )
-                {  
-                    // top/bottom padding
-                
-                    padding_y = [tray_size_3d.x, all_sets_y_offset, tray_size_3d.z];
+            
+                padding_y = [tray_size_3d.x, all_sets_y_offset, tray_size_3d.z];
 
-                    cube(padding_y);
+                cube(padding_y);
 
-                    translate([0, tray_size_3d.y - padding_y.y,0])
-                    cube(padding_y);
-                
-                }
-                // else {
-                //     padding_y = [tray_size_3d.x, all_sets_y_offset, tray_size_3d.z];
-
-                //     // bottom
-                //     translate([get_set_x_position( 0 ), 0,0])
-                //     cube([ get_set_size(0).x, all_sets_y_offset, tray_size_3d.z]);
-
-                //     // top
-                //     translate([get_set_x_position( num_sets-1 ),tray_size_3d.y - padding_y.y,0])
-                //     cube([ get_set_size(num_sets-1).x, all_sets_y_offset, tray_size_3d.z]);
-                // }
+                translate([0, tray_size_3d.y - padding_y.y,0])
+                cube(padding_y);
             }
-
-
         }
     }
 
     module PositionLid ()
     {
         if (make_tray)
-        translate( [tray_size_3d.x + 50, 0, 0])
-        children();
-        else
-        children();
+            translate( [tray_size_3d.x + 50, 0, 0])
+                children();
+            else
+                children();
     }
 
     module MakeLid()
     {
         {        
-            frame =  magnet_outer_diameter * 1.7;
+            frame =  no_magnets ? 2 : magnet_outer_diameter * 1.7;
 
             difference()
             {
                     cube( [tray_size_3d.x, tray_size_3d.y, lid_depth]);
 
                     translate([frame/2,frame/2,0])
-                    cube( [tray_size_3d.x-frame, tray_size_3d.y-frame, lid_depth]);
+                        cube( [tray_size_3d.x-frame, tray_size_3d.y-frame, lid_depth]);
 
                     if ( frame_style < 3)
-                    MakeNotches();
+                        MakeNotches();
             }
 
             difference()
@@ -549,7 +548,7 @@ module Main( DATA = DATA)
                 intersection()
                 {
                     translate([frame/2,frame/2,0])
-                    cube( [tray_size_3d.x-frame, tray_size_3d.y-frame, lid_depth]);
+                        cube( [tray_size_3d.x-frame, tray_size_3d.y-frame, lid_depth]);
 
 
                     linear_extrude( lid_depth )
@@ -796,6 +795,7 @@ module Main( DATA = DATA)
     {
 
         num_counters = get_num_counters( setidx );
+        echo( num_counters=num_counters);
         counter_size = get_counter_size(setidx);
         counter_size_outer = get_counter_size_outer( setidx );
 

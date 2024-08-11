@@ -14,8 +14,10 @@ counter_depth_standard_cardboard = 3; // 1.6mm plus 1.4mm to prevent counters po
 standard_cardboard_counter = [ half_inch_counter, half_inch_counter, counter_depth_standard_cardboard];
 five_eigths_cardboard_counter = [ five_eigths_counter, five_eigths_counter, counter_depth_standard_cardboard];
 gmt_nine_sixteenths_counter = [ nine_sixteenths_counter, nine_sixteenths_counter, counter_depth_standard_cardboard ];
-asl_small = [ half_inch_counter, half_inch_counter, half_inch_counter - 2];
-asl_large = [ five_eigths_counter, five_eigths_counter, five_eigths_counter - 2];
+asl_small = [ half_inch_counter, half_inch_counter, half_inch_counter * .85];
+asl_large = [ five_eigths_counter, five_eigths_counter, five_eigths_counter * .85];
+//sqrt(8.7*8.7 + 10*10)
+
 
 TEST =
 [
@@ -416,12 +418,10 @@ GMT_THE_US_CIVIL_WAR = // print x6
 MMP_ASL_1 =
 [
     // box dimensions 205x285
-    [G_DIMENSIONS_XY, [ 
-        1 + ( half_inch_counter + 1 ) * 15 , 
-        1 + ( half_inch_counter + 1 ) * 19]], 
+    [G_DIMENSIONS_XY, [ 211, 263.5 ]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_N, 6],
+    [COUNTER_MARGINS_POST_LENGTH_N, 5],
     [G_FRAME_STYLE_N, 3],
 
     [COUNTER_SET,
@@ -434,10 +434,10 @@ MMP_ASL_2 =
     // box dimensions 205x285
     [G_DIMENSIONS_XY, [ 
         1 + ( five_eigths_counter + 1 ) * 12 , 
-        1 + ( five_eigths_counter + 1 ) * 16]], 
+        1 + ( five_eigths_counter + 1 ) * 15]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_N, 6],
+    [COUNTER_MARGINS_POST_LENGTH_N, 5],
     [G_FRAME_STYLE_N, 3],
 
     [COUNTER_SET,
@@ -445,10 +445,36 @@ MMP_ASL_2 =
     ],
 ];
 
-if ( !TESTING )
-{
-    Main(MMP_ASL_2);
-}
+MMP_ASL_2_TEST =
+[
+    // box dimensions 205x285
+    [G_DIMENSIONS_XY, [ 
+        1 + ( five_eigths_counter + 1 ) * 4 , 
+        1 + ( five_eigths_counter + 1 ) * 4]], 
+    [G_FLOOR_THICKNESS_N, 3],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_N, 5],
+    [G_FRAME_STYLE_N, 1],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, asl_large],
+    ],
+];
+
+MMP_ASL_1_TEST =
+[
+    // box dimensions 205x285
+    [G_DIMENSIONS_XY, [ 18.5, 18.5 ]], 
+    [G_FLOOR_THICKNESS_N, 3],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_N, 5],
+    [G_FRAME_STYLE_N, 3],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, asl_small],
+    ],
+];
 
 
+Main(MMP_ASL_2_TEST);
 
