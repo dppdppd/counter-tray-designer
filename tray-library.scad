@@ -14,8 +14,8 @@ counter_depth_standard_cardboard = 3; // 1.6mm plus 1.4mm to prevent counters po
 standard_cardboard_counter = [ half_inch_counter, half_inch_counter, counter_depth_standard_cardboard];
 five_eigths_cardboard_counter = [ five_eigths_counter, five_eigths_counter, counter_depth_standard_cardboard];
 gmt_nine_sixteenths_counter = [ nine_sixteenths_counter, nine_sixteenths_counter, counter_depth_standard_cardboard ];
-asl_small = [ half_inch_counter, half_inch_counter, counter_depth_standard_cardboard*8];
-asl_large = [ five_eigths_counter, five_eigths_counter, counter_depth_standard_cardboard*8];
+asl_small = [ half_inch_counter, half_inch_counter, half_inch_counter - 2];
+asl_large = [ five_eigths_counter, five_eigths_counter, five_eigths_counter - 2];
 
 TEST =
 [
@@ -23,7 +23,7 @@ TEST =
     [G_FLOOR_THICKNESS_N, 1.5],
     // [G_MAKE_TRAY_B, false],
     // [G_MAKE_LID_B, false],
-    [COUNTER_MARGINS_XY, [1, 0.2]],
+    [COUNTER_MARGINS_XY, [0.3,0.7]],
 
     [COUNTER_SET,
         // [ENABLED_B, false],
@@ -50,39 +50,86 @@ TEST =
     ],
 ];
 
-TEST2 =
+TEST_SIMPLE =
 [
-    [G_DIMENSIONS_XY, [90, 90]], 
-    [G_FLOOR_THICKNESS_N, 1.5],
-    // [G_MAKE_TRAY_B, false],
-    // [G_MAKE_LID_B, false],
+    [G_DIMENSIONS_XY, [57, 22]], 
+    [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_N, 6],
 
     [COUNTER_SET,
-        // [ENABLED_B, false],
-        [ROWS_N, 1],
-        [COUNTER_SIZE_XYZ, [20, 20, 4.6]],
-		// [COUNTER_MARGINS_XY, [2, 0.2]],
-        [COUNTER_SHAPE, SHAPE_CIRCLE ]
+        [COUNTER_SIZE_XYZ, [20, 20, 20]],
     ],
 
+];
+
+TEST_STYLE_1 =
+[
+    [G_DIMENSIONS_XY, [1 + (nine_sixteenths_counter + 1) * 4 - 2, 1 + (nine_sixteenths_counter + 1) * 4]], 
+   // [G_FLOOR_THICKNESS_N, 1.5],
+   // [G_MIN_PADDING_XY, [0,1]],
+   // [COUNTER_MARGINS_POST_LENGTH_N, 6],
+    [G_FRAME_STYLE_N, 1],
+
     [COUNTER_SET,
-        // [ENABLED_B, false],
-        [ROWS_N, 1],
-        [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, 2]],
-		// [COUNTER_MARGINS_XY, [1, 1]],
-
-        [COUNTER_SHAPE, SHAPE_SQUARE ]
-    ],
-
-
-    [COUNTER_SET,
-        // [ENABLED_B, false],
-        [COUNTER_SIZE_XYZ, [half_inch_counter, half_inch_counter, 2]],
-        [COUNTER_SHAPE, SHAPE_SQUARE ]
+        [COUNTER_SIZE_XYZ, [nine_sixteenths_counter, nine_sixteenths_counter, counter_depth_standard_cardboard]],
     ],
 ];
 
+TEST_STYLE_2 =
+[
+    [G_DIMENSIONS_XY, [(nine_sixteenths_counter + 1) * 4, 1 + (nine_sixteenths_counter + 1) * 5]], 
+    [G_FLOOR_THICKNESS_N, 3],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_N, 6],
+    [G_FRAME_STYLE_N, 2],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [nine_sixteenths_counter, nine_sixteenths_counter, nine_sixteenths_counter - 1]],
+    ],
+];
+
+TEST_STYLE_3 =
+[
+    [G_DIMENSIONS_XY, [ 80, 80]], 
+    [G_FLOOR_THICKNESS_N, 3],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_N, 6],
+    [G_FRAME_STYLE_N, 3],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [half_inch_counter, half_inch_counter, half_inch_counter - 1]],
+    ],
+];
+
+TEST_STYLE_3b =
+[
+    [G_DIMENSIONS_XY, [ 80, 80]], 
+    [G_FLOOR_THICKNESS_N, 3],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_N, 6],
+    [G_FRAME_STYLE_N, 3],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, five_eigths_counter - 1]],
+    ],
+];
+
+TESTING = false;
+
+if ( TESTING )
+{
+    Main(TEST_STYLE_1);
+
+    translate( [ 0, 100, 0 ] )
+    Main(TEST_STYLE_2);
+
+    translate( [ 0, 200, 0 ] )
+    Main(TEST_STYLE_3);
+
+    translate( [ 0, 300, 0 ] )
+    Main(TEST_STYLE_3b);    
+}
 
 //////////////////////////////////////
 // columbia games
@@ -366,19 +413,42 @@ GMT_THE_US_CIVIL_WAR = // print x6
     ],
 ];
 
-MMP_ASL = // print x6
+MMP_ASL_1 =
 [
     // box dimensions 205x285
-        [G_DIMENSIONS_XY, [225,285]], 
-
-  //  [G_DIMENSIONS_XY, [197,282]], 
+    [G_DIMENSIONS_XY, [ 
+        1 + ( half_inch_counter + 1 ) * 15 , 
+        1 + ( half_inch_counter + 1 ) * 19]], 
+    [G_FLOOR_THICKNESS_N, 3],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_N, 6],
+    [G_FRAME_STYLE_N, 3],
 
     [COUNTER_SET,
         [COUNTER_SIZE_XYZ, asl_small],
     ],
 ];
 
+MMP_ASL_2 =
+[
+    // box dimensions 205x285
+    [G_DIMENSIONS_XY, [ 
+        1 + ( five_eigths_counter + 1 ) * 12 , 
+        1 + ( five_eigths_counter + 1 ) * 16]], 
+    [G_FLOOR_THICKNESS_N, 3],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_N, 6],
+    [G_FRAME_STYLE_N, 3],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, asl_large],
+    ],
+];
+
+if ( !TESTING )
+{
+    Main(MMP_ASL_2);
+}
 
 
 
-Main(TEST);
