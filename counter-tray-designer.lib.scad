@@ -191,10 +191,6 @@ module Main( DATA = DATA)
             get_set_y_position( stop, setidx + 1, y_new ) :
             y;
 
-    // if ( g_make_svg )
-    // projection(cut = false)
-    // MakeSetCounters();
-
     // if ( g_make_filler )
     // translate([0,10,0]) 
     // MakeFiller();
@@ -230,6 +226,11 @@ module Main( DATA = DATA)
                     MakeNotches();
             }
         }
+    }
+    else if ( g_make_svg )
+    {
+        projection(cut = false)
+        MakeTrayCenter(false);
     }
 
     if ( make_lid && !g_make_svg)
@@ -344,26 +345,29 @@ module Main( DATA = DATA)
         }
     } 
 
-    module MakeTrayCenter()
+    module MakeTrayCenter( make_base = true)
     {
         // base
-        difference() {
-            cube( [tray_size_3d.x, tray_size_3d.y, floor_thickness]);
+        if ( make_base )
+        {
+            difference() {
+                cube( [tray_size_3d.x, tray_size_3d.y, floor_thickness]);
 
-            for( setidx = [ 0: num_sets-1 ] )
-            {	
-                if ( is_enabled(setidx) )
-                {
-                    echo( str( get_num_counters(setidx).x,
-                        " x ",
-                        get_num_counters(setidx).y,
-                        " ",
-                        get_counter_size(setidx), 
-                        ", total=",
-                        get_num_counters(setidx).x * get_num_counters(setidx).y));
+                for( setidx = [ 0: num_sets-1 ] )
+                {	
+                    if ( is_enabled(setidx) )
+                    {
+                        echo( str( get_num_counters(setidx).x,
+                            " x ",
+                            get_num_counters(setidx).y,
+                            " ",
+                            get_counter_size(setidx), 
+                            ", total=",
+                            get_num_counters(setidx).x * get_num_counters(setidx).y));
 
-                    translate( [get_set_x_position(setidx), get_set_y_position(setidx) + all_sets_y_offset ,0])
-                    MakeSetCounterHoles( setidx );
+                        translate( [get_set_x_position(setidx), get_set_y_position(setidx) + all_sets_y_offset ,0])
+                        MakeSetCounterHoles( setidx );
+                    }
                 }
             }
         }
@@ -505,7 +509,7 @@ module Main( DATA = DATA)
                         }
                     }
                 }
-                
+
                 // top/bottom padding
             
                 padding_y = [tray_size_3d.x, all_sets_y_offset, tray_size_3d.z];

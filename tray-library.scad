@@ -15,7 +15,7 @@ standard_cardboard_counter = [ half_inch_counter, half_inch_counter, counter_dep
 five_eigths_cardboard_counter = [ five_eigths_counter, five_eigths_counter, counter_depth_standard_cardboard];
 gmt_nine_sixteenths_counter = [ nine_sixteenths_counter, nine_sixteenths_counter, counter_depth_standard_cardboard ];
 asl_small = [ half_inch_counter, half_inch_counter, half_inch_counter * .85];
-asl_large = [ five_eigths_counter, five_eigths_counter, five_eigths_counter * .85];
+asl_large = [ five_eigths_counter, five_eigths_counter, 11];
 //sqrt(8.7*8.7 + 10*10)
 
 
@@ -418,7 +418,7 @@ GMT_THE_US_CIVIL_WAR = // print x6
 MMP_ASL_1 =
 [
     // box dimensions 205x285
-    [G_DIMENSIONS_XY, [ 211, 263.5 ]], 
+    [G_DIMENSIONS_XY, [ 211, 281 ]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
     [COUNTER_MARGINS_POST_LENGTH_N, 5],
@@ -434,7 +434,7 @@ MMP_ASL_2 =
     // box dimensions 205x285
     [G_DIMENSIONS_XY, [ 
         1 + ( five_eigths_counter + 1 ) * 12 , 
-        1 + ( five_eigths_counter + 1 ) * 15]], 
+        1 + ( five_eigths_counter + 1 ) * 16]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
     [COUNTER_MARGINS_POST_LENGTH_N, 5],
@@ -475,6 +475,7 @@ MMP_ASL_1_TEST =
     ],
 ];
 
+g_make_svg = 0;
 
-Main(MMP_ASL_2_TEST);
+Main(MMP_ASL_2);
 
