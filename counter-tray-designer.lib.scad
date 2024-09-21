@@ -17,7 +17,8 @@ G_FRAME_STYLE_N = "G_FRAME_STYLE_N";
 //either
 COUNTER_SHAPE = "COUNTER_SHAPE";
 COUNTER_MARGINS_XY = "COUNTER_MARGINS_XY";
-COUNTER_MARGINS_POST_LENGTH_N = "COUNTER_MARGINS_POST_LENGTH_N";
+COUNTER_MARGINS_POST_LENGTH_FRACTION_N = "COUNTER_MARGINS_POST_LENGTH_FRACTION_N";
+COUNTER_HOLE_FRACTION_N = "COUNTER_HOLE_FRACTION_N";
 
 //set
 COUNTER_SET = "COUNTER_SET";
@@ -64,7 +65,8 @@ module Main( DATA = DATA)
     echo( str(tray_size_3d.x," mm x ", tray_size_3d.y," mm"));
     echo( str(tray_size_3d.x/25.4," in x ", tray_size_3d.y/25.4," in"));
     echo();
- //   echo( str("Ideal size: ", usable_area.x + tray_padding.x * 2 + 1, "mm x ", ceil(get_all_sets_size_y() + tray_padding.y * 2 + 1), "mm" ));
+    echo( str("Ideal size: ", get_max_set_size_x() + tray_padding.x * 2, "mm x ", 
+    ceil(get_all_sets_size_y() + tray_padding.y * 2), "mm" ));
 
     function is_set( idx )  = get_key( get_element( DATA, idx) ) == COUNTER_SET;
     function get_set_idx( idx ) = count_keys( DATA, COUNTER_SET, stop = idx );
@@ -106,7 +108,8 @@ module Main( DATA = DATA)
     lid_depth = find_value( DATA, G_LID_DEPTH_N, default = 2.6);
     function get_counter_margins_default() = find_value( DATA, COUNTER_MARGINS_XY, default = [0.5,0.5]);
     g_counter_shape = find_value( DATA, COUNTER_SHAPE, default = SHAPE_SQUARE);
-    g_counter_margins_post_length = find_value( DATA, COUNTER_MARGINS_POST_LENGTH_N, default = 4);
+    g_counter_margins_post_length_fraction = find_value( DATA, COUNTER_MARGINS_POST_LENGTH_FRACTION_N, default = 0.25);
+    g_counter_hole_fraction = find_value( DATA, COUNTER_HOLE_FRACTION_N, default = 0.7);
 
     tray_size_raw = find_value(DATA, G_DIMENSIONS_XY, default = [50,50]);
 
@@ -120,8 +123,6 @@ module Main( DATA = DATA)
         tray_size_3d.x - ( 2 * tray_padding.x ) - ( 2 * get_counter_margins().x ),
         tray_size_3d.y - ( 2 * tray_padding.y ) - ( 2 * get_counter_margins().y )
     ];    
-
-    echo ( tray_size_3d=tray_size_3d,usable_area=usable_area);
 
     all_sets_y_offset = 
         ( tray_size_3d.y - get_all_sets_size_y() )/2;
@@ -149,7 +150,8 @@ module Main( DATA = DATA)
         find_value( get_set( setidx ), COUNTER_SIZE_XYZ, default = [1,1,1]).z];
 
     function get_counter_margins( setidx ) = find_value( get_set(setidx), COUNTER_MARGINS_XY, default = get_counter_margins_default());
-    function get_counter_margins_post_length( setidx ) = find_value( get_set(setidx), COUNTER_MARGINS_POST_LENGTH_N, default = g_counter_margins_post_length);
+    function get_counter_margins_post_length_fraction( setidx ) = find_value( get_set(setidx), COUNTER_MARGINS_POST_LENGTH_FRACTION_N, default = g_counter_margins_post_length_fraction);
+    function get_counter_hole_fraction( setidx ) = find_value( get_set(setidx), COUNTER_HOLE_FRACTION_N, default = g_counter_hole_fraction);
 
     function num_rows_raw( setidx ) = find_value( get_set( setidx ), ROWS_N, default = -1);
 
@@ -171,6 +173,11 @@ module Main( DATA = DATA)
         get_num_counters(setidx).x * get_counter_size_outer(setidx).x + 2*get_counter_margins().x,
         get_num_counters(setidx).y * get_counter_size_outer(setidx).y + 2*get_counter_margins().y
     ];
+
+    function get_max_set_size_x( setidx = 0, max_x = 0 ) =
+        setidx < num_sets ?
+        is_enabled( setidx ) ? max( max_x, get_set_size( setidx ).x ) : max_x : 
+        max_x;
 
     function get_all_sets_size_y( setidx = 0, sum = 0) =
         setidx < num_sets ?
@@ -218,12 +225,12 @@ module Main( DATA = DATA)
 
             union() {
                 if ( frame_style == 1 )
-                    MakeBorderPaddingMagnetHoles();
+                MakeBorderPaddingMagnetHoles();
                 else if ( !no_magnets )
-                    MakeBothSidesMagnetNubHoles();
+                MakeBothSidesMagnetNubHoles();
 
                 if ( !g_make_svg && ( frame_style < 3 ) )
-                    MakeNotches();
+                MakeNotches();
             }
         }
     }
@@ -242,12 +249,12 @@ module Main( DATA = DATA)
 
             union() {
                 if ( !no_magnets && frame_style == 1 )
-                    MakeBorderPaddingMagnetHoles();
+                MakeBorderPaddingMagnetHoles();
                 else if ( !no_magnets )
-                    MakeBothSidesMagnetNubHoles();
+                MakeBothSidesMagnetNubHoles();
 
                 if ( !g_make_svg && ( frame_style < 3 ) )
-                    MakeNotches();
+                MakeNotches();
             }
         }
     }
@@ -298,7 +305,7 @@ module Main( DATA = DATA)
     module MakeSingleMagnetSlot()
     {
         translate( [tray_size_3d.x/2 - magnet_distance_from_edge.x, tray_size_3d.y/2 - magnet_distance_from_edge.y, magnet_depth/2])
-            cylinder( h = magnet_depth, d = magnet_diameter, center = true );
+        cylinder( h = magnet_depth, d = magnet_diameter, center = true );
     }
 
     module MakeNotches()
@@ -336,11 +343,11 @@ module Main( DATA = DATA)
             PlaceFourMirroredOnXY()
             {
                 translate( [tray_size_3d.x/2, tray_size_3d.y/4,0])
-                    HookIndent();
+                HookIndent();
                     
             
-              *  translate( [tray_size_3d.x/4, tray_size_3d.y/2,0])
-                    LeftHookIndent();
+            *   translate( [tray_size_3d.x/4, tray_size_3d.y/2,0])
+                LeftHookIndent();
             }
         }
     } 
@@ -443,12 +450,9 @@ module Main( DATA = DATA)
         {
             release_tool_fraction = 6;
 
-            translate( [magnet_outer_diameter/2,magnet_outer_diameter/2,0])
+            translate( [magnet_outer_diameter/2,magnet_outer_diameter/2,magnet_depth/2])
             {
-                cube( [ magnet_outer_diameter, magnet_outer_diameter/release_tool_fraction, magnet_depth*2], center = true );  
-
-                *rotate(a=[0,0,90])
-                cube( [ magnet_outer_diameter, magnet_outer_diameter/release_tool_fraction, magnet_depth*2], center = true );  
+                cube( [ magnet_outer_diameter, magnet_outer_diameter/release_tool_fraction, magnet_depth*3], center = true );  
             }
         }
 
@@ -799,7 +803,6 @@ module Main( DATA = DATA)
     {
 
         num_counters = get_num_counters( setidx );
-        echo( num_counters=num_counters);
         counter_size = get_counter_size(setidx);
         counter_size_outer = get_counter_size_outer( setidx );
 
@@ -841,12 +844,16 @@ module Main( DATA = DATA)
 
         module MakeCounterHole( extra = 0)
         {
-            inset = 4 + extra;
+            inset = [ 
+                counter_size.x - ( get_counter_hole_fraction(setidx) * counter_size.x) + extra,
+                counter_size.y - ( get_counter_hole_fraction(setidx) * counter_size.y) + extra 
+                ];
+
             diam = 2.5;
 
             dist_from_center = [
-                (counter_size.x - inset - diam)/2,
-                (counter_size.y - inset - diam)/2
+                (counter_size.x - inset.x - diam)/2,
+                (counter_size.y - inset.y - diam)/2
             ];
 
             thickness = get_set_floor_thickness(setidx);
@@ -929,7 +936,7 @@ module Main( DATA = DATA)
             module MakeCounterCorner()
             {
                 margins = get_counter_margins() + [extra,extra];
-                post_length = get_counter_margins_post_length();
+                post_length = get_counter_margins_post_length_fraction() * counter_size.x;
                 
                 translate([0, 0, tray_size_3d.z/2])
                 {

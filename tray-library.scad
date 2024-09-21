@@ -6,6 +6,7 @@ tray_gmt2 = [ 220,250];
 tray_revolution = [211,246];
 
 half_inch_counter = 13.3;
+old_half_inch_counter = 14;
 five_eigths_counter = 16.5;
 nine_sixteenths_counter = 15;
 
@@ -14,7 +15,7 @@ counter_depth_standard_cardboard = 3; // 1.6mm plus 1.4mm to prevent counters po
 standard_cardboard_counter = [ half_inch_counter, half_inch_counter, counter_depth_standard_cardboard];
 five_eigths_cardboard_counter = [ five_eigths_counter, five_eigths_counter, counter_depth_standard_cardboard];
 gmt_nine_sixteenths_counter = [ nine_sixteenths_counter, nine_sixteenths_counter, counter_depth_standard_cardboard ];
-asl_small = [ half_inch_counter, half_inch_counter, half_inch_counter * .85];
+asl_small = [ half_inch_counter, half_inch_counter, half_inch_counter * .95];
 asl_large = [ five_eigths_counter, five_eigths_counter, 11];
 //sqrt(8.7*8.7 + 10*10)
 
@@ -57,7 +58,7 @@ TEST_SIMPLE =
     [G_DIMENSIONS_XY, [57, 22]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_N, 6],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .5],
 
     [COUNTER_SET,
         [COUNTER_SIZE_XYZ, [20, 20, 20]],
@@ -70,7 +71,7 @@ TEST_STYLE_1 =
     [G_DIMENSIONS_XY, [1 + (nine_sixteenths_counter + 1) * 4 - 2, 1 + (nine_sixteenths_counter + 1) * 4]], 
    // [G_FLOOR_THICKNESS_N, 1.5],
    // [G_MIN_PADDING_XY, [0,1]],
-   // [COUNTER_MARGINS_POST_LENGTH_N, 6],
+   // [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .5],
     [G_FRAME_STYLE_N, 1],
 
     [COUNTER_SET,
@@ -83,7 +84,7 @@ TEST_STYLE_2 =
     [G_DIMENSIONS_XY, [(nine_sixteenths_counter + 1) * 4, 1 + (nine_sixteenths_counter + 1) * 5]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_N, 6],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .5],
     [G_FRAME_STYLE_N, 2],
 
     [COUNTER_SET,
@@ -96,7 +97,7 @@ TEST_STYLE_3 =
     [G_DIMENSIONS_XY, [ 80, 80]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_N, 6],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .5],
     [G_FRAME_STYLE_N, 3],
 
     [COUNTER_SET,
@@ -109,7 +110,7 @@ TEST_STYLE_3b =
     [G_DIMENSIONS_XY, [ 80, 80]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_N, 6],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .5],
     [G_FRAME_STYLE_N, 3],
 
     [COUNTER_SET,
@@ -421,7 +422,7 @@ MMP_ASL_1 =
     [G_DIMENSIONS_XY, [ 211, 281 ]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_N, 5],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
     [G_FRAME_STYLE_N, 3],
 
     [COUNTER_SET,
@@ -437,12 +438,34 @@ MMP_ASL_2 =
         1 + ( five_eigths_counter + 1 ) * 16]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_N, 5],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
     [G_FRAME_STYLE_N, 3],
 
     [COUNTER_SET,
         [COUNTER_SIZE_XYZ, asl_large],
     ],
+];
+
+MMP_ASL_3 =
+[
+    // box dimensions 205x285
+    [G_DIMENSIONS_XY, [ 
+        1 + ( five_eigths_counter + 1 ) * 12 , 
+        1 + ( five_eigths_counter + 1 ) * 16]], 
+    [G_FLOOR_THICKNESS_N, 3],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
+    [G_FRAME_STYLE_N, 3],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, asl_large],
+        [ROWS_N, 8],
+    ],    
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, asl_small],
+    ],    
+
 ];
 
 MMP_ASL_2_TEST =
@@ -453,8 +476,8 @@ MMP_ASL_2_TEST =
         1 + ( five_eigths_counter + 1 ) * 4]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_N, 5],
-    [G_FRAME_STYLE_N, 1],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
+    [G_FRAME_STYLE_N, 3],
 
     [COUNTER_SET,
         [COUNTER_SIZE_XYZ, asl_large],
@@ -464,18 +487,81 @@ MMP_ASL_2_TEST =
 MMP_ASL_1_TEST =
 [
     // box dimensions 205x285
-    [G_DIMENSIONS_XY, [ 18.5, 18.5 ]], 
+    [G_DIMENSIONS_XY, [ 90, 90 ]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_N, 5],
-    [G_FRAME_STYLE_N, 3],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
+    [G_FRAME_STYLE_N, 4],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, asl_large],
+        [ROWS_N, 1],
+    ],
 
     [COUNTER_SET,
         [COUNTER_SIZE_XYZ, asl_small],
     ],
+
+];
+
+VG_THE_CIVIL_WAR =
+[
+    // box dimensions 205x285
+    [G_DIMENSIONS_XY, [ 196, 256 ]], 
+    [G_FLOOR_THICKNESS_N, 3],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
+    [G_FRAME_STYLE_N, 3],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, 
+        [ old_half_inch_counter, old_half_inch_counter, 1.8*4]],
+    ],
+];
+
+LEGION_A_GLORIOUS_CHANCE_1 =
+[
+
+    // 288 square 5/8
+    // 32 5/8 x 10/8
+
+    // box dimensions 205x285
+    [G_DIMENSIONS_XY, [ 193.5, 211 ]], 
+    [G_FLOOR_THICKNESS_N, 2],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
+    [G_FRAME_STYLE_N, 3],
+
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [five_eigths_counter, 31, counter_depth_standard_cardboard]],
+        [ROWS_N, 3],
+    ],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, counter_depth_standard_cardboard]],
+    ],    
+];
+
+LEGION_A_GLORIOUS_CHANCE_2 =
+[
+
+    // 288 square 5/8
+    // 32 5/8 x 10/8
+
+    // box dimensions 205x285
+    [G_DIMENSIONS_XY, [ 193.5, 211 ]], 
+    [G_FLOOR_THICKNESS_N, 2],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
+    [G_FRAME_STYLE_N, 3],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, counter_depth_standard_cardboard*2]],
+    ],    
 ];
 
 g_make_svg = 0;
 
-Main(MMP_ASL_2);
+Main(LEGION_A_GLORIOUS_CHANCE_2);
 
