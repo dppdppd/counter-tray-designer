@@ -13,12 +13,14 @@ G_DIMENSIONS_XY = "G_DIMENSIONS_XY";
 G_MIN_PADDING_XY = "G_MIN_PADDING_XY";
 G_LID_DEPTH_N = "G_LID_DEPTH_N"; 
 G_FRAME_STYLE_N = "G_FRAME_STYLE_N";
+G_MAGNET_DIAMETER_N = "G_MAGNET_DIAMETER_N";
 
 //either
 COUNTER_SHAPE = "COUNTER_SHAPE";
 COUNTER_MARGINS_XY = "COUNTER_MARGINS_XY";
 COUNTER_MARGINS_POST_LENGTH_FRACTION_N = "COUNTER_MARGINS_POST_LENGTH_FRACTION_N";
 COUNTER_HOLE_FRACTION_N = "COUNTER_HOLE_FRACTION_N";
+
 
 //set
 COUNTER_SET = "COUNTER_SET";
@@ -29,6 +31,7 @@ ENABLED_B = "ENABLED_B";
 // values
 SHAPE_SQUARE = "SHAPE_SQUARE";
 SHAPE_CIRCLE = "SHAPE_CIRCLE";
+SHAPE_TRIANGLE = "SHAPE_TRIANGLE";
 
 DATA = [];
 
@@ -37,7 +40,7 @@ KEY = 0;
 VALUE = 1;
 
 function get_element( table, i ) = table[ i ];
-function num_elements( table ) = len( table );
+function get_num_elements( table ) = len( table );
 
 function get_key( table ) = table[KEY];
 
@@ -54,10 +57,10 @@ function count_keys( table, key, start = 0, stop = -1, idx = 0, sum = 0 ) =
 
 ///////////////////////////////////////////////////////////////////////
 
-function preview() =  $preview;
-$fn = preview() ? 20 : 50;
+function is_preview() =  $preview;
+$fn = is_preview() ? 20 : 50;
 
-module Main( DATA = DATA)
+module main( DATA = DATA)
 {
     echo( str( "\n\n\n", COPYRIGHT_INFO, "\n\n\tVersion ", VERSION, "\n\n" ));
 
@@ -73,7 +76,7 @@ module Main( DATA = DATA)
     num_sets = count_keys( DATA, COUNTER_SET );
 
     function get_set( set_idx, idx = 0 ) =
-        idx > num_elements(DATA) ? [] :
+        idx > get_num_elements(DATA) ? [] :
     //    echo( idx=idx, is_set=is_set(idx), count_keys=count_keys( DATA, COUNTER_SET, stop = idx ) )
         is_set( idx ) && count_keys( DATA, COUNTER_SET, stop = idx ) - 1 == set_idx ?
             get_element( DATA, idx ) :
@@ -81,10 +84,11 @@ module Main( DATA = DATA)
 
     /////////////////////////////////////////
  
-    floor_thickness = find_value( DATA, G_FLOOR_THICKNESS_N, default = 1.5);
+    _floor_thickness = find_value( DATA, G_FLOOR_THICKNESS_N, default = 1.5);
     make_tray = find_value( DATA, G_MAKE_TRAY_B, default = true);
     make_lid = find_value( DATA, G_MAKE_LID_B, default = true);
     frame_style = find_value( DATA, G_FRAME_STYLE_N, default = 1);
+    magnet_diameter = find_value( DATA, G_MAGNET_DIAMETER_N, default = 6.2 );
 
     no_magnets = frame_style == 4;
 
@@ -92,7 +96,7 @@ module Main( DATA = DATA)
     // note that turning it on makes the tray more aesthetic but that you can't mix and match sizes because they won't line up
     MOVE_NUBS_TO_COUNTER_POSITIONS = false;
 
-    magnet_diameter = frame_style < 3 ? 6.2 : 10.2;
+    //magnet_diameter = frame_style < 3 ? 6.2 : 10.2;
     magnet_wall_min = frame_style < 3 ? 0.2 : !MOVE_NUBS_TO_COUNTER_POSITIONS ? 1.2 : (get_counter_size_outer( 0 ).x - magnet_diameter )/2;
     magnet_outer_diameter = magnet_diameter + magnet_wall_min * 2;
     magnet_nub_max_spacing = 100;
@@ -129,14 +133,14 @@ module Main( DATA = DATA)
 
     function get_tray_size_z( setidx = 0, max_z = 0 ) =
             setidx < num_sets ?
-            get_tray_size_z( setidx + 1, max( max_z, get_counter_size(setidx).z + floor_thickness)) :
+            get_tray_size_z( setidx + 1, max( max_z, get_counter_size(setidx).z + _floor_thickness)) :
             max_z;
 
 
-    PER_SET_FLOOR_THICKNESS = false;
+    PER_SET_FLOOR_THICKNESS = true;
     function get_set_floor_thickness(setidx) = 
         PER_SET_FLOOR_THICKNESS ? tray_size_3d.z - get_counter_size(setidx).z :
-        floor_thickness;
+        _floor_thickness;
 
     g_fill_corners = 0;
     g_tolerance = 0.1;
@@ -144,6 +148,11 @@ module Main( DATA = DATA)
     function is_enabled(setidx) = find_value( get_set( setidx ), ENABLED_B, default = true);
 
     function get_counter_size( setidx ) = find_value( get_set( setidx ), COUNTER_SIZE_XYZ, default = [1,1,1]);
+    function get_counter_shape( setidx ) = find_value( get_set( setidx ), COUNTER_SHAPE, default = g_counter_shape);
+
+    // trigon
+    function get_tri_counter_center_margins( setidx ) = [ get_counter_margins().x * cos(45), get_counter_margins().y * sin(45), 0];
+
     function get_counter_size_outer( setidx ) = [
         ( find_value( get_set( setidx ), COUNTER_SIZE_XYZ, default = [1,1,1]) ).x + 2 * get_counter_margins().x,
         ( find_value( get_set( setidx ), COUNTER_SIZE_XYZ, default = [1,1,1]) ).y + 2 * get_counter_margins().y,
@@ -198,9 +207,11 @@ module Main( DATA = DATA)
             get_set_y_position( stop, setidx + 1, y_new ) :
             y;
 
+
+
     // if ( g_make_filler )
     // translate([0,10,0]) 
-    // MakeFiller();
+    // create_filler();
 
     color_base = "white";
     color_padding = "yellow";
@@ -215,46 +226,46 @@ module Main( DATA = DATA)
         difference() {
 
             union(){
-                MakeTrayCenter();
+                create_tray_center();
 
                 if ( frame_style == 1 )
-                    MakeBorderPadding();
+                    create_border_padding();
                 else if ( !no_magnets )
-                    MakeBothSidesMagnetNubs();
+                    create_magnet_nubs_both_sides();
             }
 
             union() {
                 if ( frame_style == 1 )
-                MakeBorderPaddingMagnetHoles();
+                create_border_padding_magnet_holes();
                 else if ( !no_magnets )
-                MakeBothSidesMagnetNubHoles();
+                create_magnet_nub_holes_both_sides();
 
                 if ( !g_make_svg && ( frame_style < 3 ) )
-                MakeNotches();
+                create_notches();
             }
         }
     }
     else if ( g_make_svg )
     {
         projection(cut = false)
-        MakeTrayCenter(false);
+        create_tray_center(false);
     }
 
     if ( make_lid && !g_make_svg)
-    PositionLid()
+    place_lid()
     {
         difference() {
 
-            MakeLid();
+            create_lid();
 
             union() {
                 if ( !no_magnets && frame_style == 1 )
-                MakeBorderPaddingMagnetHoles();
+                create_border_padding_magnet_holes();
                 else if ( !no_magnets )
-                MakeBothSidesMagnetNubHoles();
+                create_magnet_nub_holes_both_sides();
 
                 if ( !g_make_svg && ( frame_style < 3 ) )
-                MakeNotches();
+                create_notches();
             }
         }
     }
@@ -262,7 +273,7 @@ module Main( DATA = DATA)
     echo();
 
 ///////////////////////////////////////////
-    module PlaceFourMirroredOnXY( dimensions = [0,0,0])
+    module place_four_mirrored_on_xy( dimensions = [0,0,0])
     {
         translate(dimensions/2)
         {
@@ -280,35 +291,35 @@ module Main( DATA = DATA)
         }
     }
 
-    module MakeMagnetSlots( body_depth )
+    module create_magnet_slots( body_depth )
     {
 
         function IsTrayDeep() = tray_size_3d.z > ( 2 * magnet_depth + 0.2 );
 
-        MakeOneSetOfMagnetSlots();
+        create_one_set_of_magnet_slots();
 
         if ( IsTrayDeep() )
         {
             translate([0, 0, tray_size_3d.z - magnet_depth])
-            MakeOneSetOfMagnetSlots();
+            create_one_set_of_magnet_slots();
         }
         
 
-        module MakeOneSetOfMagnetSlots()
+        module create_one_set_of_magnet_slots()
         {
             dimensions = [tray_size_3d.x, tray_size_3d.y, 0];
-            PlaceFourMirroredOnXY( dimensions )
-            MakeSingleMagnetSlot();
+            place_four_mirrored_on_xy( dimensions )
+            create_single_magnet_slot();
         }
     }
 
-    module MakeSingleMagnetSlot()
+    module create_single_magnet_slot()
     {
         translate( [tray_size_3d.x/2 - magnet_distance_from_edge.x, tray_size_3d.y/2 - magnet_distance_from_edge.y, magnet_depth/2])
         cylinder( h = magnet_depth, d = magnet_diameter, center = true );
     }
 
-    module MakeNotches()
+    module create_notches()
     {
         diam = 6;
         height = tray_size_3d.z * 2;
@@ -318,7 +329,7 @@ module Main( DATA = DATA)
                 [ 0,    0,    1,  0   ],
                 [ 0,    0,    0,  1   ] ] ;
 
-        module HookIndent()
+        module create_hook_indent()
         {
             union()
             {
@@ -331,34 +342,50 @@ module Main( DATA = DATA)
             }
         }
 
-        module LeftHookIndent()
+        module create_hook_indent_left()
         {
             rotate(90,[0,0,1])
-            HookIndent();
+            create_hook_indent();
 
         }
 
         translate([tray_size_3d.x/2, tray_size_3d.y/2, tray_size_3d.z/2])
         {
-            PlaceFourMirroredOnXY()
+            place_four_mirrored_on_xy()
             {
                 translate( [tray_size_3d.x/2, tray_size_3d.y/4,0])
-                HookIndent();
+                create_hook_indent();
                     
             
             *   translate( [tray_size_3d.x/4, tray_size_3d.y/2,0])
-                LeftHookIndent();
+                create_hook_indent_left();
             }
         }
     } 
 
-    module MakeTrayCenter( make_base = true)
+    module create_tray_center( make_base = true)
     {
         // base
         if ( make_base )
         {
             difference() {
-                cube( [tray_size_3d.x, tray_size_3d.y, floor_thickness]);
+
+                union()
+                {
+                    // minimum sheet
+                    cube( [tray_size_3d.x, tray_size_3d.y, _floor_thickness]);
+
+                    // per set floor
+                    for( setidx = [ 0: num_sets-1 ] )
+                    {	     
+                        translate( [get_set_x_position(setidx), get_set_y_position(setidx) + all_sets_y_offset ,0])   
+                        { 
+                      //  cube( [get_set_size(setidx).x, get_set_size(setidx).y, get_set_floor_thickness(setidx)]);
+                        create_set_of_counter_holes( setidx, extra = 2 );
+                        }
+
+                    }
+                }
 
                 for( setidx = [ 0: num_sets-1 ] )
                 {	
@@ -373,7 +400,8 @@ module Main( DATA = DATA)
                             get_num_counters(setidx).x * get_num_counters(setidx).y));
 
                         translate( [get_set_x_position(setidx), get_set_y_position(setidx) + all_sets_y_offset ,0])
-                        MakeSetCounterHoles( setidx );
+                        create_set_of_counter_holes( setidx );
+                        
                     }
                 }
             }
@@ -387,7 +415,7 @@ module Main( DATA = DATA)
                 translate( [get_set_x_position(setidx), get_set_y_position(setidx) + all_sets_y_offset ,0])
                 {
                     color( rands(0, 1, 3) )
-                    MakeSetCounters( setidx );
+                    create_set_of_counters( setidx );
                 }
 
             // cube([tray_size_3d.x, tray_size_3d.y, 1]);
@@ -398,26 +426,26 @@ module Main( DATA = DATA)
 
     function tray_requires_double_magnets() = tray_size_3d.z > ( 2 * magnet_depth + 0.2 );
 
-    module MakeBothSidesMagnetNubs()
+    module create_magnet_nubs_both_sides()
     {
-        MakeOneSetMagnetNubs();
+        create_one_set_magnet_nubs();
 
         mirror([1,0,0])
         translate( [(-tray_size_3d.x ),0])
-        MakeOneSetMagnetNubs();
+        create_one_set_magnet_nubs();
     }
 
-    module MakeBothSidesMagnetNubHoles()
+    module create_magnet_nub_holes_both_sides()
     {
-        MakeOneSetMagnetNubHoles();
+        create_one_set_magnet_nub_holes();
 
         mirror([1,0,0])
         translate( [(-tray_size_3d.x ),0])
-        MakeOneSetMagnetNubHoles();
+        create_one_set_magnet_nub_holes();
     }    
 
 
-    module PlaceNubChildren()
+    module place_nub_children()
     {
         offset_r = frame_style == 3 ? [ get_set_x_position(0), all_sets_y_offset,0] : [0,0,0];
         offset_l = frame_style == 3 ? [ get_set_x_position(0), -all_sets_y_offset,0] : [0,0,0];
@@ -438,15 +466,15 @@ module Main( DATA = DATA)
     }
 
 
-    module MakeOneSetMagnetNubs()
+    module create_one_set_magnet_nubs()
     {
-        PlaceNubChildren()
+        place_nub_children()
         cube([ magnet_outer_diameter,magnet_outer_diameter,tray_size_3d.z ]);
     }
     
-    module MakeOneSetMagnetNubHoles()
+    module create_one_set_magnet_nub_holes()
     {
-        module ReleaseGap()
+        module create_release_gap()
         {
             release_tool_fraction = 6;
 
@@ -456,7 +484,7 @@ module Main( DATA = DATA)
             }
         }
 
-        PlaceNubChildren()
+        place_nub_children()
         {
             CUT_THROUGH = false;
 
@@ -464,7 +492,7 @@ module Main( DATA = DATA)
             cylinder( h = magnet_depth, d = magnet_diameter, center = true );
 
             if ( !CUT_THROUGH )
-            ReleaseGap();
+            create_release_gap();
 
             if ( tray_requires_double_magnets() )
             {
@@ -473,7 +501,7 @@ module Main( DATA = DATA)
                     cylinder( h = magnet_depth, d = magnet_diameter, center = true );
 
                     if ( !CUT_THROUGH )
-                    ReleaseGap();
+                    create_release_gap();
                 }
             }
 
@@ -483,12 +511,12 @@ module Main( DATA = DATA)
         }
     }
 
-    module MakeBorderPaddingMagnetHoles()
+    module create_border_padding_magnet_holes()
     {
-        MakeMagnetSlots( body_depth = tray_size_3d.z );
+        create_magnet_slots( body_depth = tray_size_3d.z );
     }
 
-    module MakeBorderPadding()
+    module create_border_padding()
     {
         color( color_padding)
         difference()
@@ -526,7 +554,7 @@ module Main( DATA = DATA)
         }
     }
 
-    module PositionLid ()
+    module place_lid ()
     {
         if (make_tray)
             translate( [tray_size_3d.x + 50, 0, 0])
@@ -535,7 +563,7 @@ module Main( DATA = DATA)
                 children();
     }
 
-    module MakeLid()
+    module create_lid()
     {
         {        
             frame =  no_magnets ? 2 : magnet_outer_diameter * 1.7;
@@ -548,7 +576,7 @@ module Main( DATA = DATA)
                         cube( [tray_size_3d.x-frame, tray_size_3d.y-frame, lid_depth]);
 
                     if ( frame_style < 3)
-                        MakeNotches();
+                        create_notches();
             }
 
             difference()
@@ -564,7 +592,7 @@ module Main( DATA = DATA)
                         R = m_lid_pattern_radius;
                         t = m_lid_pattern_thickness;
 
-                        Make2DPattern( x=tray_size_3d.x, y=tray_size_3d.y, R=R, t=t );
+                        create_2d_pattern( x=tray_size_3d.x, y=tray_size_3d.y, R=R, t=t );
                     }
                 }
             }
@@ -581,7 +609,7 @@ module Main( DATA = DATA)
         m_lid_pattern_n2 = 4;
 
 
-        module Make2DPattern( x = 200, y = 200, R = 1, t = 0.5 )
+        module create_2d_pattern( x = 200, y = 200, R = 1, t = 0.5 )
         {
             r = cos( m_lid_pattern_angle ) * R;
 
@@ -598,10 +626,10 @@ module Main( DATA = DATA)
                         translate( [ i * dx, j * dy, 0 ] )
                             rotate( a = m_lid_pattern_angle, v=[ 0, 0, 1 ] )
                             {
-                                Make2dShape( R, t, m_lid_pattern_n1, m_lid_pattern_n2 );
+                                create_2d_shape( R, t, m_lid_pattern_n1, m_lid_pattern_n2 );
                             }
 
-            module Make2dShape( R, t, n1, n2 )
+            module create_2d_shape( R, t, n1, n2 )
             {
 
                 if ( n1 == 3 && n2 == 3 )
@@ -618,12 +646,12 @@ module Main( DATA = DATA)
                     Oct( R, t );
                 else
                 {
-                    base = AddPoint( R, 0, n1 );
-                    inset = AddPoint( R, t, n2 );
+                    base = add_point( R, 0, n1 );
+                    inset = add_point( R, t, n2 );
 
                     combined = concat( base, inset );
 
-                    order = concat( [ AddOrderIndex( 0, n1)], [AddOrderIndex( n1, n1 + n2, n1 )] );
+                    order = concat( [ add_order_index( 0, n1)], [add_order_index( n1, n1 + n2, n1 )] );
 
                     polygon( combined, order );     
                 }
@@ -787,19 +815,19 @@ module Main( DATA = DATA)
                 }
 
 
-                function AddPoint( R, t, n, i = 0 ) = i == n ? [] : 
+                function add_point( R, t, n, i = 0 ) = i == n ? [] : 
                     concat( [[ ( R - t ) * cos( i * 2 * ( PI / n) * 180 / PI ), ( R - t ) * sin( i * 2 * ( PI / n) * 180 / PI ) ]],
-                        AddPoint( R, t, n, i + 1 ) );
+                        add_point( R, t, n, i + 1 ) );
 
-                function AddOrderIndex( b, e, i = 0 ) = i == e ? [] :
-                    concat ( i, AddOrderIndex( b, e, i + 1) );
+                function add_order_index( b, e, i = 0 ) = i == e ? [] :
+                    concat ( i, add_order_index( b, e, i + 1) );
 
             }       
         }
     }
 
 
-    module ForEachCounterPosition(setidx)
+    module for_each_counter(setidx)
     {
 
         num_counters = get_num_counters( setidx );
@@ -829,20 +857,21 @@ module Main( DATA = DATA)
         }
     }
         
-    module MakeSetCounterHoles( setidx )
+    module create_set_of_counter_holes( setidx, extra = 0 )
     {
         set = get_set( setidx );
 
         num_counters = get_num_counters( setidx );
-        counter_size = get_counter_size(setidx);
+        counter_size = get_counter_size(setidx) + [ extra, extra ];
         counter_size_outer = get_counter_size_outer( setidx );
 
-        round_counters = find_value( set, COUNTER_SHAPE, default = g_counter_shape) == SHAPE_CIRCLE;
+        round_counters = get_counter_shape(setidx) == SHAPE_CIRCLE;
+        triangle_counters = get_counter_shape(setidx) == SHAPE_TRIANGLE;
 
-        ForEachCounterPosition(setidx)
-        MakeCounterHole();
+        for_each_counter(setidx)
+        create_single_counter_hole();
 
-        module MakeCounterHole( extra = 0)
+        module create_single_counter_hole( extra = 0)
         {
             inset = [ 
                 counter_size.x - ( get_counter_hole_fraction(setidx) * counter_size.x) + extra,
@@ -859,30 +888,36 @@ module Main( DATA = DATA)
             thickness = get_set_floor_thickness(setidx);
 
             translate( [counter_size_outer.x/2, counter_size_outer.y/2, thickness/2])
-
-            if ( !round_counters)
-            hull()
-            {
-                translate( [ -dist_from_center.x, -dist_from_center.y, 0] )
-                cylinder( h=thickness * 1, d=2.5, center=true );
-
-                translate( [ dist_from_center.x, -dist_from_center.y, 0] )
-                cylinder( h=thickness * 1, d=2.5, center=true );
-
-                translate( [ -dist_from_center.x, dist_from_center.y, 0] )
-                cylinder( h=thickness * 1, d=2.5, center=true );
-
-                translate( [ dist_from_center.x, dist_from_center.y, 0] )
-                cylinder( h=thickness * 1, d=2.5, center=true );
-            }
-            else 
+            if ( round_counters)
             {  
-                cylinder( h=thickness * 1, d=counter_size.x - inset, center=true );           
+                cylinder( h=thickness * 1, d=counter_size.x - inset.x, center=true );           
             }
+            else if ( triangle_counters)
+            {
+
+            }
+            else
+            {
+                hull()
+                {
+                    translate( [ -dist_from_center.x, -dist_from_center.y, 0] )
+                    cylinder( h=thickness * 1, d=2.5, center=true );
+
+                    translate( [ dist_from_center.x, -dist_from_center.y, 0] )
+                    cylinder( h=thickness * 1, d=2.5, center=true );
+
+                    translate( [ -dist_from_center.x, dist_from_center.y, 0] )
+                    cylinder( h=thickness * 1, d=2.5, center=true );
+
+                    translate( [ dist_from_center.x, dist_from_center.y, 0] )
+                    cylinder( h=thickness * 1, d=2.5, center=true );
+                }
+            }
+   
         }
     }
 
-    module MakeSetCounters( setidx )
+    module create_set_of_counters( setidx )
     {
         set = get_set( setidx );
 
@@ -890,35 +925,37 @@ module Main( DATA = DATA)
         counter_size = get_counter_size(setidx);
         counter_size_outer = get_counter_size_outer( setidx );
 
-        round_counters = find_value( set, COUNTER_SHAPE, default = SHAPE_SQUARE) == SHAPE_CIRCLE;
+        round_counters = get_counter_shape(setidx) == SHAPE_CIRCLE;
+        triangle_counters = get_counter_shape(setidx) == SHAPE_TRIANGLE;
 
-        {        
-            difference()
+               
+        difference()
+        {
+            union()
             {
-                union()
+                for_each_counter(setidx)
                 {
-                    ForEachCounterPosition(setidx)
-                    {
-            *         # cube(counter_size_outer);
+        *         # cube(counter_size_outer);
 
-            *         # translate(get_counter_margins())
-                        cube(counter_size);
+        *         # translate(get_counter_margins())
+                    cube(counter_size);
 
-                        MakeCounter();
-                    }
-                    
-                    if ( 0 )
-                    FillCorners();                
+                    create_counter();
                 }
+                
+                if ( 0 )
+                FillCorners();                
             }
         }
+    
 
-        module MakeCounter( extra = 0 )
+        module create_counter( extra = 0 )
         {
 
             margins = get_counter_margins(setidx) + [extra,extra];
 
-            module MakeRoundCounterSide()
+
+            module create_counter_wall_round()
             {
                 translate([0, 0, tray_size_3d.z/2])
                 {
@@ -933,7 +970,7 @@ module Main( DATA = DATA)
                 }
             }
 
-            module MakeCounterCorner()
+            module create_counter_corner_square()
             {
                 margins = get_counter_margins() + [extra,extra];
                 post_length = get_counter_margins_post_length_fraction() * counter_size.x;
@@ -958,44 +995,43 @@ module Main( DATA = DATA)
                     cube(hor_cube, center = true);
                 }
             }
-            
     
             if( round_counters )
             {
-                MakeRoundCounterSide();
+                create_counter_wall_round();
 
                 translate( [counter_size.x + margins.x*2,0,0])
                 mirror([1,0,0])
-                MakeRoundCounterSide();
+                create_counter_wall_round();
 
                 translate([counter_size_outer.x,0,0])
                 rotate([0,0,90])
                 {
-                    MakeRoundCounterSide();
+                    create_counter_wall_round();
 
                     translate( [counter_size.x + margins.x*2,0,0])
                     mirror([1,0,0])
-                    MakeRoundCounterSide();
+                    create_counter_wall_round();
                 }
             }
             else
             {
-                MakeCounterCorner();
+                create_counter_corner_square();
                 
                 union()
                 {
-                translate( [counter_size.x + margins.x*2,0,0])
-                mirror([1,0,0])
-                MakeCounterCorner();
+                    translate( [counter_size.x + margins.x*2,0,0])
+                    mirror([1,0,0])
+                    create_counter_corner_square();
 
-                translate( [0,counter_size.y + margins.y*2,0])
-                mirror([0,1,0])
-                MakeCounterCorner();
-                
-                translate( [counter_size.x + margins.x *2, counter_size.y + margins.y *2, 0])
-                mirror([1,0,0])
-                mirror([0,1,0])
-                MakeCounterCorner();
+                    translate( [0,counter_size.y + margins.y*2,0])
+                    mirror([0,1,0])
+                    create_counter_corner_square();
+                    
+                    translate( [counter_size.x + margins.x *2, counter_size.y + margins.y *2, 0])
+                    mirror([1,0,0])
+                    mirror([0,1,0])
+                    create_counter_corner_square();
                 }
 
                 *translate(v = [margins.x, margins.y, 0])
@@ -1005,18 +1041,18 @@ module Main( DATA = DATA)
         }            
     
 
-        module MakeFiller()
+        module create_filler()
         {
             union()
             {
                 difference()
                 {
                     cube([counter_size_outer.x, counter_size_outer.y, tray_size_3d.z]);
-                    MakeCounter( g_tolerance );
+                    create_counter( g_tolerance );
                     cube([counter_size_outer.x, counter_size_outer.y, floor_thickness + g_tolerance]);
 
                 }
-            //   MakeCounterHole( g_tolerance );
+            //   create_single_counter_hole( g_tolerance );
             }
         }
 

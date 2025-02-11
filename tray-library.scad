@@ -599,14 +599,23 @@ DG_RAF =
     ],    
 ];
 
-GMT_TOMAHAWKS_AND_BAYONETS =
+GMT_TOMAHAWKS_AND_BAYONETS_BRITISH =
 [
 
-    // 288 square 5/8
-    // 32 5/8 x 10/8
+// 38 triangles: 20.5x23
+//      11 british
+//      5 either
 
-    // box dimensions 205x285
-    [G_DIMENSIONS_XY, [ 211, 281 ]], 
+// 54 circle    21
+//      32 british
+
+// 62 large square  20.5x20.5
+//      46 british
+
+// 176 5/8ths
+
+    // [G_DIMENSIONS_XY, [ 215, 290 ]], 
+    [G_DIMENSIONS_XY, [ 193, 282 ]], 
     [G_FLOOR_THICKNESS_N, 2],
     [G_MIN_PADDING_XY, [0,0]],
     [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
@@ -614,14 +623,132 @@ GMT_TOMAHAWKS_AND_BAYONETS =
     
   //  [G_MAGNET_DIAMETER_N, 10.2],
 
+    // large square
     [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, 2]],
-    //    [COUNTER_SHAPE, SHAPE_TRIANGLE ]
+        [COUNTER_SIZE_XYZ, [20.5, 20.5, 3]],
+        [ROWS_N, 6],
+    ], 
 
-    ],    
+    // triangles
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [23, 20.5, 3]],
+        [ROWS_N, 2],
+    ],   
+
+    // circles
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [21, 21, 3]],
+        [COUNTER_SHAPE, SHAPE_CIRCLE],
+        [ROWS_N, 4],
+    ],  
+
+     
+
+    [COUNTER_SET,
+        // [ENABLED_B, false],
+        [COUNTER_SIZE_XYZ, [16.5, 16.5, 3]],
+        [ROWS_N, 1],
+    ],   
 ];
+
+GMT_TOMAHAWKS_AND_BAYONETS_FRENCH =
+[
+
+// 38 triangles: 20.5x23
+//      22 french
+
+// 54 circle    21
+//      22 french
+
+// 62 large square  20.5x20.5
+//      16 french
+
+// 176 5/8ths
+
+
+    // [G_DIMENSIONS_XY, [ 215, 290 ]], 
+    [G_DIMENSIONS_XY, [ 193, 282 ]], 
+
+    [G_FLOOR_THICKNESS_N, 2],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
+    [G_FRAME_STYLE_N, 3],
+    
+  //  [G_MAGNET_DIAMETER_N, 10.2],
+
+    // large squares
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [20.5, 20.5, 3]],
+        [ROWS_N, 2],
+    ],      
+    
+    
+    // triangles
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [23, 20.5, 3]],
+        [ROWS_N, 3],
+    ],   
+
+    // circles
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [21, 21, 3]],
+        [COUNTER_SHAPE, SHAPE_CIRCLE],
+        [ROWS_N, 3],
+    ],  
+
+
+    [COUNTER_SET,
+        // [ENABLED_B, false],
+        [COUNTER_SIZE_XYZ, [16.5, 16.5, 3]],
+        // [ROWS_N, 1],
+    ],   
+];
+
+GMT_TOMAHAWKS_AND_BAYONETS_SHARED =
+[
+
+// 168 5/8ths
+
+
+    // [G_DIMENSIONS_XY, [ 215, 290 ]], 
+    [G_DIMENSIONS_XY, [ 193, 282 ]], 
+
+    [G_FLOOR_THICKNESS_N, 2],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
+    [G_FRAME_STYLE_N, 3],
+
+    [COUNTER_SET,
+        // [ENABLED_B, false],
+        [COUNTER_SIZE_XYZ, [16.5, 16.5, 3]],
+        // [ROWS_N, 1],
+    ],   
+];
+
+
+tile_depth = 3;
+
+GMT_1862 =
+[
+
+    [G_DIMENSIONS_XY, [ 215, 235 ]], 
+
+    [G_FLOOR_THICKNESS_N, 2],
+    [G_MIN_PADDING_XY, [0,0]],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, 1],
+    [G_FRAME_STYLE_N, 3],
+
+    [COUNTER_SET,
+        // [ENABLED_B, false],
+        [COUNTER_SIZE_XYZ, [39, 44, tile_depth*4]],
+        // [ROWS_N, 1],
+    ],   
+];
+
+
+main(GMT_1862);
+
 
 g_make_svg = 0;
 
-Main(GMT_TOMAHAWKS_AND_BAYONETS);
 
