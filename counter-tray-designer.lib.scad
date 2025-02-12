@@ -32,6 +32,7 @@ ENABLED_B = "ENABLED_B";
 SHAPE_SQUARE = "SHAPE_SQUARE";
 SHAPE_CIRCLE = "SHAPE_CIRCLE";
 SHAPE_TRIANGLE = "SHAPE_TRIANGLE";
+SHAPE_HEX = "SHAPE_HEX";
 
 DATA = [];
 
@@ -376,12 +377,14 @@ module main( DATA = DATA)
                     cube( [tray_size_3d.x, tray_size_3d.y, _floor_thickness]);
 
                     // per set floor
-                    for( setidx = [ 0: num_sets-1 ] )
+                    // can't find where this is useful
+                *    for( setidx = [ 0: num_sets-1 ] )
                     {	     
                         translate( [get_set_x_position(setidx), get_set_y_position(setidx) + all_sets_y_offset ,0])   
                         { 
                       //  cube( [get_set_size(setidx).x, get_set_size(setidx).y, get_set_floor_thickness(setidx)]);
-                        create_set_of_counter_holes( setidx, extra = 2 );
+                     
+                            create_set_of_counter_holes( setidx, extra = 2 );
                         }
 
                     }
@@ -415,7 +418,7 @@ module main( DATA = DATA)
                 translate( [get_set_x_position(setidx), get_set_y_position(setidx) + all_sets_y_offset ,0])
                 {
                     color( rands(0, 1, 3) )
-                    create_set_of_counters( setidx );
+                    create_set_of_counter_walls( setidx );
                 }
 
             // cube([tray_size_3d.x, tray_size_3d.y, 1]);
@@ -827,7 +830,7 @@ module main( DATA = DATA)
     }
 
 
-    module for_each_counter(setidx)
+    module for_each_counter(setidx, b_skip_corners = false, b_skip_edges = false)
     {
 
         num_counters = get_num_counters( setidx );
@@ -839,12 +842,43 @@ module main( DATA = DATA)
         //    cube([tray_size_3d.x, tray_size_3d.y, tray_size_3d.z]);
 
             
-            for( i=[0:num_counters.x-1], j=[0:num_counters.y-1])
+        function skip_corners(c,r) = 
+      //  num_counters.x >= 3 && num_counters.y >= 3 &&
+      //  frame_style == 3 && 
+        b_skip_corners && 
+        (
+                                ( setidx == 0 && 
+                                (( c == 0 && r == 0 ) || 
+                                ( c == num_counters.x-1 && r == 0 ) ) ||
+
+                                ( setidx == num_sets-1 &&
+                                ( c == num_counters.x-1 && r == num_counters.y-1 ) ||
+                                ( c == 0 && r == num_counters.y-1 ))));
+
+        function skip_edges(c,r) = 
+      //  num_counters.x >= 3 && num_counters.y >= 3 &&
+      //  frame_style == 3 && 
+        b_skip_edges && 
+        (
+                                ( setidx == 0 && 
+                                ((  r == 0 ) ) ||
+
+                                ( setidx == num_sets-1 &&
+                                ( r == num_counters.y-1 )) ||
+                        
+                                ( c == 0 ) ||
+                                ( c == num_counters.x-1 )));
+
+
+            for( c=[0:num_counters.x-1], r=[0:num_counters.y-1])
             {
-            // if ( !skip(i,j) )
+            // skip is so the corners don't colide with the magnet pegs but sometimes
+            // the pegs are not in the way
+            if ( !skip_corners(c,r) && !skip_edges(c,r))
+             {
                 pos = [
-                    get_counter_margins().x + i * counter_size_outer.x,
-                    get_counter_margins().y + j * counter_size_outer.y, 
+                    get_counter_margins().x + c * counter_size_outer.x,
+                    get_counter_margins().y + r * counter_size_outer.y, 
                     0
                 ];
 
@@ -853,6 +887,7 @@ module main( DATA = DATA)
                 //    cube();
                     children();
                 }
+             }
             }
         }
     }
@@ -862,13 +897,14 @@ module main( DATA = DATA)
         set = get_set( setidx );
 
         num_counters = get_num_counters( setidx );
-        counter_size = get_counter_size(setidx) + [ extra, extra ];
+        counter_size = get_counter_size(setidx) + [ extra, extra, 0 ];
         counter_size_outer = get_counter_size_outer( setidx );
 
-        round_counters = get_counter_shape(setidx) == SHAPE_CIRCLE;
-        triangle_counters = get_counter_shape(setidx) == SHAPE_TRIANGLE;
+        b_round_counters = get_counter_shape(setidx) == SHAPE_CIRCLE;
+        b_triangle_counters = get_counter_shape(setidx) == SHAPE_TRIANGLE;
+        b_hex_counters = get_counter_shape(setidx) == SHAPE_HEX;
 
-        for_each_counter(setidx)
+        for_each_counter(setidx, b_skip_corners = b_hex_counters)
         create_single_counter_hole();
 
         module create_single_counter_hole( extra = 0)
@@ -888,13 +924,26 @@ module main( DATA = DATA)
             thickness = get_set_floor_thickness(setidx);
 
             translate( [counter_size_outer.x/2, counter_size_outer.y/2, thickness/2])
-            if ( round_counters)
+            if ( b_round_counters)
             {  
                 cylinder( h=thickness * 1, d=counter_size.x - inset.x, center=true );           
             }
-            else if ( triangle_counters)
+            else if ( b_triangle_counters)
             {
 
+            }
+            else if ( b_hex_counters )
+            {
+                size_x = counter_size_outer.x ;
+                size_y =  counter_size_outer.y;
+                height = thickness;
+
+
+                place_four_mirrored_on_xy([0, 0, 0])
+                translate([size_x/2,size_y/2,0])
+            //    cube(counter_size * 0.7, center=true);
+                cylinder( h=thickness * 1, d=size_x * .6, center=true );
+                          
             }
             else
             {
@@ -917,7 +966,7 @@ module main( DATA = DATA)
         }
     }
 
-    module create_set_of_counters( setidx )
+    module create_set_of_counter_walls( setidx )
     {
         set = get_set( setidx );
 
@@ -925,8 +974,9 @@ module main( DATA = DATA)
         counter_size = get_counter_size(setidx);
         counter_size_outer = get_counter_size_outer( setidx );
 
-        round_counters = get_counter_shape(setidx) == SHAPE_CIRCLE;
-        triangle_counters = get_counter_shape(setidx) == SHAPE_TRIANGLE;
+        b_round_counters = get_counter_shape(setidx) == SHAPE_CIRCLE;
+        b_triangle_counters = get_counter_shape(setidx) == SHAPE_TRIANGLE;
+        b_hex_counters = get_counter_shape(setidx) == SHAPE_HEX;
 
                
         difference()
@@ -935,12 +985,15 @@ module main( DATA = DATA)
             {
                 for_each_counter(setidx)
                 {
+
+                    //DEBUG
         *         # cube(counter_size_outer);
 
+                    //DEBUG
         *         # translate(get_counter_margins())
                     cube(counter_size);
 
-                    create_counter();
+                    create_counter_walls();
                 }
                 
                 if ( 0 )
@@ -949,11 +1002,10 @@ module main( DATA = DATA)
         }
     
 
-        module create_counter( extra = 0 )
+        module create_counter_walls( extra = 0 )
         {
 
             margins = get_counter_margins(setidx) + [extra,extra];
-
 
             module create_counter_wall_round()
             {
@@ -995,8 +1047,32 @@ module main( DATA = DATA)
                     cube(hor_cube, center = true);
                 }
             }
+
+            module create_counter_wall_hex()
+            {
+
+                // display actual counters debug
+        *         # translate([counter_size_outer.x/2, counter_size_outer.y/2, counter_size.z/2])
+                    cylinder(h = tray_size_3d.z, d = counter_size.x, center=true, $fn=6);
+
+                size_y = counter_size_outer.y * 0.3;
+                size_x = counter_size_outer.x;
+
+              //  translate([margins.x,  margins.y, 0])
+                translate([0, 0, (tray_size_3d.z + get_set_floor_thickness(setidx)) / 2])
+                {
+                    difference()
+                    {
+                        translate([counter_size_outer.x/2, counter_size_outer.y/2 ,0])
+                         cube([size_x, size_y, counter_size_outer.z], center = true);
+
+                        translate([counter_size_outer.x/2, counter_size_outer.y/2, 0])
+                        cylinder(h = tray_size_3d.z, d = counter_size.x, center=true, $fn=6);
+                    }
+                }
+            }            
     
-            if( round_counters )
+            if( b_round_counters )
             {
                 create_counter_wall_round();
 
@@ -1013,6 +1089,10 @@ module main( DATA = DATA)
                     mirror([1,0,0])
                     create_counter_wall_round();
                 }
+            }
+            else if( b_hex_counters )
+            {
+                create_counter_wall_hex();
             }
             else
             {
@@ -1048,7 +1128,7 @@ module main( DATA = DATA)
                 difference()
                 {
                     cube([counter_size_outer.x, counter_size_outer.y, tray_size_3d.z]);
-                    create_counter( g_tolerance );
+                    create_counter_walls( g_tolerance );
                     cube([counter_size_outer.x, counter_size_outer.y, floor_thickness + g_tolerance]);
 
                 }
@@ -1056,12 +1136,7 @@ module main( DATA = DATA)
             }
         }
 
-        function skip(i,j) = 
-        num_counters.x >= 3 && num_counters.y >= 3 && 
-                                (( i == 0 && j == 0 ) || 
-                                ( i == num_counters.x-1 && j == 0 ) ||
-                                ( i == num_counters.x-1 && j == num_counters.y-1 ) ||
-                                ( i == 0 && j == num_counters.y-1 ));
+
 
     }
 }

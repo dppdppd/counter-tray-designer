@@ -731,17 +731,15 @@ tile_depth = 3;
 GMT_1862 =
 [
 
-    [G_DIMENSIONS_XY, [ 215, 235 ]], 
+    [G_DIMENSIONS_XY, [ 231, 210 ]], 
 
     [G_FLOOR_THICKNESS_N, 2],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, 1],
     [G_FRAME_STYLE_N, 3],
 
     [COUNTER_SET,
-        // [ENABLED_B, false],
-        [COUNTER_SIZE_XYZ, [39, 44, tile_depth*4]],
-        // [ROWS_N, 1],
+        [COUNTER_SIZE_XYZ, [45, 39, tile_depth * 4]],
+        [COUNTER_SHAPE, SHAPE_HEX],
     ],   
 ];
 
