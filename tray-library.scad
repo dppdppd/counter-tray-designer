@@ -726,9 +726,9 @@ GMT_TOMAHAWKS_AND_BAYONETS_SHARED =
 ];
 
 
-tile_depth = 3;
+tile_depth = 2.8;
 
-GMT_1862 =
+GMT_1862_1 =
 [
 
     [G_DIMENSIONS_XY, [ 231, 210 ]], 
@@ -738,13 +738,70 @@ GMT_1862 =
     [G_FRAME_STYLE_N, 3],
 
     [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, [45, 39, tile_depth * 4]],
+        [COUNTER_SIZE_XYZ, [45, 39, tile_depth * 5]],
         [COUNTER_SHAPE, SHAPE_HEX],
     ],   
 ];
 
+GMT_1862_2 =
+[
 
-main(GMT_1862);
+    [G_DIMENSIONS_XY, [ 231, 210 ]], 
+
+    [G_FLOOR_THICKNESS_N, 2],
+    [G_MIN_PADDING_XY, [0,0]],
+    [G_FRAME_STYLE_N, 3],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [33, 33, 8]],
+    ],   
+];
+
+// need 2 of these:
+GMT_1862_3 =
+[
+    // cards
+
+    [G_DIMENSIONS_XY, [ 231, 210 ]], 
+
+    [G_FLOOR_THICKNESS_N, 2],
+    [G_MIN_PADDING_XY, [0,0]],
+    [G_FRAME_STYLE_N, 3],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .6],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [45, 33.83, 12]],
+        [COUNTER_HOLE_FRACTION_N, 0],
+
+    ],   
+];
+
+
+// Battlefields of the Napoleonic Wars
+BFNW =
+[
+
+    [G_DIMENSIONS_XY, [ 131, 168 ]], 
+
+    [G_FLOOR_THICKNESS_N, 2],
+    [G_MIN_PADDING_XY, [0,0]],
+    [G_FRAME_STYLE_N, 3],
+
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [13, 15, 4]],
+        [ROWS_N, 1],
+    ],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, [25, 15, 11]],
+
+
+
+    ],   
+];
+
+main(BFNW);
 
 
 g_make_svg = 0;

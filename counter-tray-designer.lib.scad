@@ -924,7 +924,10 @@ module main( DATA = DATA)
             thickness = get_set_floor_thickness(setidx);
 
             translate( [counter_size_outer.x/2, counter_size_outer.y/2, thickness/2])
-            if ( b_round_counters)
+            if ( get_counter_hole_fraction(setidx) == 0)
+            {
+            }
+            else if ( b_round_counters)
             {  
                 cylinder( h=thickness * 1, d=counter_size.x - inset.x, center=true );           
             }
