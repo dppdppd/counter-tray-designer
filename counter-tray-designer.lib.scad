@@ -20,6 +20,8 @@ COUNTER_SHAPE = "COUNTER_SHAPE";
 COUNTER_MARGINS_XY = "COUNTER_MARGINS_XY";
 COUNTER_MARGINS_POST_LENGTH_FRACTION_N = "COUNTER_MARGINS_POST_LENGTH_FRACTION_N";
 COUNTER_HOLE_FRACTION_N = "COUNTER_HOLE_FRACTION_N";
+COUNTER_PEDESTAL_B = "COUNTER_PEDESTAL_B";
+COUNTER_PEDESTAL_MIN = "COUNTER_PEDESTAL_MIN";
 
 
 //set
@@ -115,6 +117,8 @@ module main( DATA = DATA)
     g_counter_shape = find_value( DATA, COUNTER_SHAPE, default = SHAPE_SQUARE);
     g_counter_margins_post_length_fraction = find_value( DATA, COUNTER_MARGINS_POST_LENGTH_FRACTION_N, default = 0.25);
     g_counter_hole_fraction = find_value( DATA, COUNTER_HOLE_FRACTION_N, default = 0.7);
+    g_counter_pedestal = find_value( DATA, COUNTER_PEDESTAL_B, default = true);
+    g_counter_pedestal_min = find_value( DATA, COUNTER_PEDESTAL_MIN, default = 0);
 
     tray_size_raw = find_value(DATA, G_DIMENSIONS_XY, default = [50,50]);
 
@@ -132,16 +136,16 @@ module main( DATA = DATA)
     all_sets_y_offset = 
         ( tray_size_3d.y - get_all_sets_size_y() )/2;
 
-    function get_tray_size_z( setidx = 0, max_z = 0 ) =
+        function get_tray_size_z( setidx = 0, max_z = 0 ) =
             setidx < num_sets ?
-            get_tray_size_z( setidx + 1, max( max_z, get_counter_size(setidx).z + _floor_thickness)) :
+            let( ped_min = use_counter_pedestals(setidx) ? get_counter_pedestal_min(setidx) : 0  )
+            let( needed_floor =  _floor_thickness + ped_min )
+            get_tray_size_z( setidx + 1, max( max_z, get_counter_size(setidx).z + needed_floor)) :
             max_z;
 
 
-    PER_SET_FLOOR_THICKNESS = true;
     function get_set_floor_thickness(setidx) = 
-        PER_SET_FLOOR_THICKNESS ? tray_size_3d.z - get_counter_size(setidx).z :
-        _floor_thickness;
+         tray_size_3d.z - get_counter_size(setidx).z;
 
     g_fill_corners = 0;
     g_tolerance = 0.1;
@@ -162,6 +166,8 @@ module main( DATA = DATA)
     function get_counter_margins( setidx ) = find_value( get_set(setidx), COUNTER_MARGINS_XY, default = get_counter_margins_default());
     function get_counter_margins_post_length_fraction( setidx ) = find_value( get_set(setidx), COUNTER_MARGINS_POST_LENGTH_FRACTION_N, default = g_counter_margins_post_length_fraction);
     function get_counter_hole_fraction( setidx ) = find_value( get_set(setidx), COUNTER_HOLE_FRACTION_N, default = g_counter_hole_fraction);
+    function get_counter_pedestal_min( setidx ) = find_value( get_set( setidx ), COUNTER_PEDESTAL_MIN, default = g_counter_pedestal_min);
+    function use_counter_pedestals( setidx ) = find_value( get_set( setidx ), COUNTER_PEDESTAL_B, default = g_counter_pedestal);
 
     function num_rows_raw( setidx ) = find_value( get_set( setidx ), ROWS_N, default = -1);
 
@@ -378,13 +384,12 @@ module main( DATA = DATA)
 
                     // per set floor
                     // can't find where this is useful
-                *    for( setidx = [ 0: num_sets-1 ] )
+                    for( setidx = [ 0: num_sets-1 ] )
                     {	     
+                        if ( use_counter_pedestals(setidx))
                         translate( [get_set_x_position(setidx), get_set_y_position(setidx) + all_sets_y_offset ,0])   
                         { 
-                      //  cube( [get_set_size(setidx).x, get_set_size(setidx).y, get_set_floor_thickness(setidx)]);
-                     
-                            create_set_of_counter_holes( setidx, extra = 2 );
+                            create_set_of_counter_holes( setidx, extra = 1 );
                         }
 
                     }
@@ -409,7 +414,6 @@ module main( DATA = DATA)
                 }
             }
         }
-
         // dividers
         for( setidx = [ 0: num_sets-1 ] )
         {	
@@ -536,9 +540,6 @@ module main( DATA = DATA)
                             padding_x = [get_set_x_position(setidx), get_set_size(setidx).y, tray_size_3d.z];
                             
                             translate([-padding_x.x, 0, 0])
-                            cube(padding_x);
-
-                            translate([get_set_size(setidx).x, 0, 0])
                             cube(padding_x);
                             
                         }
@@ -1028,7 +1029,7 @@ module main( DATA = DATA)
             module create_counter_corner_square()
             {
                 margins = get_counter_margins() + [extra,extra];
-                post_length = get_counter_margins_post_length_fraction() * counter_size.x;
+                post_length = get_counter_margins_post_length_fraction(setidx) * counter_size.x;
                 
                 translate([0, 0, tray_size_3d.z/2])
                 {

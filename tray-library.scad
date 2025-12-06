@@ -27,6 +27,8 @@ TEST =
     // [G_MAKE_TRAY_B, false],
     // [G_MAKE_LID_B, false],
     [COUNTER_MARGINS_XY, [0.3,0.7]],
+    [COUNTER_PEDESTAL_B, true],
+
 
     [COUNTER_SET,
         // [ENABLED_B, false],
@@ -58,7 +60,7 @@ TEST_SIMPLE =
     [G_DIMENSIONS_XY, [57, 22]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .5],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .3],
 
     [COUNTER_SET,
         [COUNTER_SIZE_XYZ, [20, 20, 20]],
@@ -71,7 +73,7 @@ TEST_STYLE_1 =
     [G_DIMENSIONS_XY, [1 + (nine_sixteenths_counter + 1) * 4 - 2, 1 + (nine_sixteenths_counter + 1) * 4]], 
    // [G_FLOOR_THICKNESS_N, 1.5],
    // [G_MIN_PADDING_XY, [0,1]],
-   // [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .5],
+   [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .3],
     [G_FRAME_STYLE_N, 1],
 
     [COUNTER_SET,
@@ -84,7 +86,7 @@ TEST_STYLE_2 =
     [G_DIMENSIONS_XY, [(nine_sixteenths_counter + 1) * 4, 1 + (nine_sixteenths_counter + 1) * 5]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .5],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .2],
     [G_FRAME_STYLE_N, 2],
 
     [COUNTER_SET,
@@ -97,7 +99,7 @@ TEST_STYLE_3 =
     [G_DIMENSIONS_XY, [ 80, 80]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .5],
+    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .7],
     [G_FRAME_STYLE_N, 3],
 
     [COUNTER_SET,
@@ -110,7 +112,7 @@ TEST_STYLE_3b =
     [G_DIMENSIONS_XY, [ 80, 80]], 
     [G_FLOOR_THICKNESS_N, 3],
     [G_MIN_PADDING_XY, [0,0]],
-    [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .5],
+    // [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .5],
     [G_FRAME_STYLE_N, 3],
 
     [COUNTER_SET,
@@ -122,16 +124,22 @@ TESTING = false;
 
 if ( TESTING )
 {
-    Main(TEST_STYLE_1);
+    main(TEST_STYLE_1);
 
     translate( [ 0, 100, 0 ] )
-    Main(TEST_STYLE_2);
+    main(TEST_STYLE_2);
 
     translate( [ 0, 200, 0 ] )
-    Main(TEST_STYLE_3);
+    main(TEST_STYLE_3);
 
     translate( [ 0, 300, 0 ] )
-    Main(TEST_STYLE_3b);    
+    main(TEST_STYLE_3b);    
+
+    translate( [ 0, 400, 0 ] )
+    main(TEST);    
+
+    translate( [ 0, 500, 0 ] )
+    main(TEST_SIMPLE);      
 }
 
 //////////////////////////////////////
@@ -781,20 +789,24 @@ GMT_1862_3 =
 BFNW =
 [
 
-    [G_DIMENSIONS_XY, [ 131, 168 ]], 
+    [G_DIMENSIONS_XY, [ 131, 162 ]], 
 
     [G_FLOOR_THICKNESS_N, 2],
     [G_MIN_PADDING_XY, [0,0]],
     [G_FRAME_STYLE_N, 3],
-
+    [COUNTER_PEDESTAL_MIN, 1],
 
     [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, [13, 15, 4]],
+        [COUNTER_SIZE_XYZ, [13, 15, 2.2]],
         [ROWS_N, 1],
+
     ],
 
     [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, [25, 15, 11]],
+        [COUNTER_SIZE_XYZ, [25, 15, 5]],
+        [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, 0.2],
+
+
 
 
 
