@@ -786,7 +786,7 @@ GMT_1862_3 =
 
 
 // Battlefields of the Napoleonic Wars
-BFNW =
+BotNW =
 [
 
     [G_DIMENSIONS_XY, [ 131, 148 ]], 
@@ -805,11 +805,6 @@ BFNW =
     [COUNTER_SET,
         [COUNTER_SIZE_XYZ, [25, 15, 11]],
         [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, 0.2],
-
-
-
-
-
     ],   
 ];
 
