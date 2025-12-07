@@ -808,7 +808,7 @@ BotNW =
     ],   
 ];
 
-main(BFNW);
+main(BotNW);
 
 
 g_make_svg = 0;
