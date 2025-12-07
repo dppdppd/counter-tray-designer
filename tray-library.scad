@@ -15,7 +15,7 @@ counter_depth_standard_cardboard = 3; // 1.6mm plus 1.4mm to prevent counters po
 standard_cardboard_counter = [ half_inch_counter, half_inch_counter, counter_depth_standard_cardboard];
 five_eigths_cardboard_counter = [ five_eigths_counter, five_eigths_counter, counter_depth_standard_cardboard];
 gmt_nine_sixteenths_counter = [ nine_sixteenths_counter, nine_sixteenths_counter, counter_depth_standard_cardboard ];
-asl_small = [ half_inch_counter, half_inch_counter, half_inch_counter * .95];
+asl_small = [ half_inch_counter, half_inch_counter, half_inch_counter];
 asl_large = [ five_eigths_counter, five_eigths_counter, 11];
 //sqrt(8.7*8.7 + 10*10)
 
@@ -432,6 +432,7 @@ MMP_ASL_1 =
     [G_MIN_PADDING_XY, [0,0]],
     [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
     [G_FRAME_STYLE_N, 3],
+    [G_MAGNET_DIAMETER_N, 10.2],
 
     [COUNTER_SET,
         [COUNTER_SIZE_XYZ, asl_small],
@@ -448,6 +449,8 @@ MMP_ASL_2 =
     [G_MIN_PADDING_XY, [0,0]],
     [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
     [G_FRAME_STYLE_N, 3],
+    [G_MAGNET_DIAMETER_N, 10.2],
+
 
     [COUNTER_SET,
         [COUNTER_SIZE_XYZ, asl_large],
@@ -464,6 +467,8 @@ MMP_ASL_3 =
     [G_MIN_PADDING_XY, [0,0]],
     [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
     [G_FRAME_STYLE_N, 3],
+    [G_MAGNET_DIAMETER_N, 10.2],
+
 
     [COUNTER_SET,
         [COUNTER_SIZE_XYZ, asl_large],
@@ -808,7 +813,7 @@ BotNW =
     ],   
 ];
 
-main(BotNW);
+main(MMP_ASL_1);
 
 
 g_make_svg = 0;
