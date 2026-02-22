@@ -30,6 +30,11 @@ ROWS_N = "START_ROW";
 COUNTER_SIZE_XYZ = "COUNTER_SIZE_XYZ";
 ENABLED_B = "ENABLED_B";
 
+//tray
+TRAY = "TRAY";
+G_GRID_COLUMNS_N = "G_GRID_COLUMNS_N";
+G_GRID_SPACING_N = "G_GRID_SPACING_N";
+
 // values
 SHAPE_SQUARE = "SHAPE_SQUARE";
 SHAPE_CIRCLE = "SHAPE_CIRCLE";
@@ -63,10 +68,95 @@ function count_keys( table, key, start = 0, stop = -1, idx = 0, sum = 0 ) =
 function is_preview() =  $preview;
 $fn = is_preview() ? 20 : 50;
 
-module Make( DATA = DATA)
+///////////////////////////////////////////////////////////////////////
+// TRAY hierarchy helpers
+///////////////////////////////////////////////////////////////////////
+
+function has_trays(data) = count_keys(data, TRAY) > 0;
+
+function get_tray(data, tray_idx, idx = 0) =
+    idx >= len(data) ? [] :
+    get_key(data[idx]) == TRAY && count_keys(data, TRAY, stop = idx) - 1 == tray_idx ?
+        data[idx] :
+        get_tray(data, tray_idx, idx + 1);
+
+function get_top_level_globals(data, idx = 0) =
+    idx >= len(data) ? [] :
+    (get_key(data[idx]) != TRAY && get_key(data[idx]) != COUNTER_SET) ?
+        concat([data[idx]], get_top_level_globals(data, idx + 1)) :
+        get_top_level_globals(data, idx + 1);
+
+function get_tray_contents(tray_entry, idx = 1) =
+    idx >= len(tray_entry) ? [] :
+    concat([tray_entry[idx]], get_tray_contents(tray_entry, idx + 1));
+
+function build_effective_tray_data(tray_entry, top_globals) =
+    concat(get_tray_contents(tray_entry), top_globals);
+
+function _get_tray_dimensions(effective_data) =
+    find_value(effective_data, G_DIMENSIONS_XY, default = [50, 50]);
+
+function _get_tray_total_width(effective_data) =
+    let(dims = _get_tray_dimensions(effective_data))
+    let(mt = find_value(effective_data, G_MAKE_TRAY_B, default = true))
+    let(ml = find_value(effective_data, G_MAKE_LID_B, default = true))
+    (mt && ml) ? dims.x * 2 + 50 : dims.x;
+
+function _get_row_x_offset(data, top_globals, tray_idx, grid_cols, spacing) =
+    let(row_start = floor(tray_idx / grid_cols) * grid_cols)
+    _get_row_x_offset_r(data, top_globals, tray_idx, row_start, spacing);
+
+function _get_row_x_offset_r(data, top_globals, tray_idx, cur, spacing) =
+    cur >= tray_idx ? 0 :
+    let(eff = build_effective_tray_data(get_tray(data, cur), top_globals))
+    let(w = _get_tray_total_width(eff))
+    w + spacing + _get_row_x_offset_r(data, top_globals, tray_idx, cur + 1, spacing);
+
+function _get_row_max_height(data, top_globals, row, grid_cols, num_trays, col = 0, max_h = 0) =
+    let(idx = row * grid_cols + col)
+    (col >= grid_cols || idx >= num_trays) ? max_h :
+    let(eff = build_effective_tray_data(get_tray(data, idx), top_globals))
+    let(dims = _get_tray_dimensions(eff))
+    _get_row_max_height(data, top_globals, row, grid_cols, num_trays, col + 1, max(max_h, dims.y));
+
+function _get_col_y_offset(data, top_globals, tray_idx, grid_cols, spacing, num_trays, row = 0, sum = 0) =
+    let(target_row = floor(tray_idx / grid_cols))
+    row >= target_row ? sum :
+    let(row_h = _get_row_max_height(data, top_globals, row, grid_cols, num_trays))
+    _get_col_y_offset(data, top_globals, tray_idx, grid_cols, spacing, num_trays, row + 1, sum + row_h + spacing);
+
+///////////////////////////////////////////////////////////////////////
+
+module Make( DATA = DATA )
 {
     echo( str( "\n\n\n", COPYRIGHT_INFO, "\n\n\tVersion ", VERSION, "\n\n" ));
 
+    if ( !has_trays(DATA) )
+    {
+        _MakeSingleTray(DATA);
+    }
+    else
+    {
+        _top_globals = get_top_level_globals(DATA);
+        _num_trays = count_keys(DATA, TRAY);
+        _grid_cols = find_value(DATA, G_GRID_COLUMNS_N, default = 2);
+        _tray_spacing = find_value(DATA, G_GRID_SPACING_N, default = 50);
+
+        for ( tray_idx = [0 : _num_trays - 1] )
+        {
+            _tray_entry = get_tray(DATA, tray_idx);
+            _effective_data = build_effective_tray_data(_tray_entry, _top_globals);
+            _x_offset = _get_row_x_offset(DATA, _top_globals, tray_idx, _grid_cols, _tray_spacing);
+            _y_offset = _get_col_y_offset(DATA, _top_globals, tray_idx, _grid_cols, _tray_spacing, _num_trays);
+
+            translate([_x_offset, _y_offset, 0])
+                _MakeSingleTray(_effective_data);
+        }
+    }
+}
+
+module _MakeSingleTray( DATA )
+{
     echo();
     echo( str(tray_size_3d.x," mm x ", tray_size_3d.y," mm"));
     echo( str(tray_size_3d.x/25.4," in x ", tray_size_3d.y/25.4," in"));
@@ -385,10 +475,10 @@ module Make( DATA = DATA)
                     // per set floor
                     // can't find where this is useful
                     for( setidx = [ 0: num_sets-1 ] )
-                    {	     
-                        if ( use_counter_pedestals(setidx))
-                        translate( [get_set_x_position(setidx), get_set_y_position(setidx) + all_sets_y_offset ,0])   
-                        { 
+                    {
+                        if ( use_counter_pedestals(setidx) && get_counter_shape(setidx) != SHAPE_HEX)
+                        translate( [get_set_x_position(setidx), get_set_y_position(setidx) + all_sets_y_offset ,0])
+                        {
                             create_set_of_counter_holes( setidx, extra = 1 );
                         }
 
@@ -541,7 +631,10 @@ module Make( DATA = DATA)
                             
                             translate([-padding_x.x, 0, 0])
                             cube(padding_x);
-                            
+
+                            translate([get_set_size(setidx).x, 0, 0])
+                            cube(padding_x);
+
                         }
                     }
                 }
@@ -946,7 +1039,7 @@ module Make( DATA = DATA)
                 place_four_mirrored_on_xy([0, 0, 0])
                 translate([size_x/2,size_y/2,0])
             //    cube(counter_size * 0.7, center=true);
-                cylinder( h=thickness * 1, d=size_x * .6, center=true );
+                cylinder( h=thickness + 1, d=size_x * .6, center=true );
                           
             }
             else
