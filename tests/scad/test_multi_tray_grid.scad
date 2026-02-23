@@ -1,7 +1,7 @@
 // Test: multi-tray grid layout with G_GRID_COLUMNS_N
 // Verifies that 4 trays arrange into a 2x2 grid.
 
-include <../../counter_tray_designer_lib.1.scad>
+include <../../lib/counter_tray_designer_lib.1.scad>
 
 TEST_GRID =
 [

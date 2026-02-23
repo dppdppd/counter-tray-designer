@@ -2,3 +2,4 @@
 *.3mf
 *.svg
 /archive/*
+/STL/*

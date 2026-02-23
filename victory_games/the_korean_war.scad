@@ -1,0 +1,16 @@
+// Victory Games — The Korean War
+include <../lib/victory_games_constants.scad>
+
+THE_KOREAN_WAR = // print x2
+[
+    // box dimensions 205x285
+        [G_DIMENSIONS_XY, [200,284]],
+
+  //  [G_DIMENSIONS_XY, [197,282]],
+
+    [COUNTER_SET,
+        [COUNTER_SIZE_XYZ, standard_cardboard_counter],
+    ],
+];
+
+Make(THE_KOREAN_WAR);

@@ -2,7 +2,7 @@
 // Verifies that the new Make() module correctly delegates to _MakeSingleTray
 // when no TRAY hierarchy is used.
 
-include <../../counter_tray_designer_lib.1.scad>
+include <../../lib/counter_tray_designer_lib.1.scad>
 
 TEST_BACKWARD_COMPAT =
 [
