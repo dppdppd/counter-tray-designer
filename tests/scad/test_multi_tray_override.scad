@@ -2,7 +2,7 @@
 // Verifies that tray-local settings override shared defaults.
 // Two trays: one with style 3 (override), one using shared style 4.
 
-include <../../lib/counter_tray_designer_lib.1.scad>
+include <../../release/lib/counter_tray_designer_lib.1.scad>
 
 TEST_MULTI_TRAY_OVERRIDE =
 [

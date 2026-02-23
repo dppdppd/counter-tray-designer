@@ -13,7 +13,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-LIBRARY_DIR="$PROJECT_DIR/library"
+LIBRARY_DIR="$PROJECT_DIR/release"
 RENDER_DIR="$SCRIPT_DIR/renders/library"
 IMGSIZE="800,600"
 RENDER_TIMEOUT=120
@@ -39,7 +39,7 @@ FILES=()
 if [[ ${#TARGETS[@]} -eq 0 ]]; then
     while IFS= read -r f; do
         FILES+=("$f")
-    done < <(find "$LIBRARY_DIR" -mindepth 2 -name '*.scad' ! -name '*_constants.scad' | sort)
+    done < <(find "$LIBRARY_DIR" -mindepth 2 -name '*.scad' ! -name '*_constants.scad' ! -path '*/lib/*' | sort)
 else
     for t in "${TARGETS[@]}"; do
         f="$LIBRARY_DIR/${t}.scad"

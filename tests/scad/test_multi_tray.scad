@@ -2,7 +2,7 @@
 // Verifies that Make() auto-arranges multiple trays in a grid.
 // Two trays with shared defaults and different per-tray dimensions.
 
-include <../../lib/counter_tray_designer_lib.1.scad>
+include <../../release/lib/counter_tray_designer_lib.1.scad>
 
 TEST_MULTI_TRAY =
 [
