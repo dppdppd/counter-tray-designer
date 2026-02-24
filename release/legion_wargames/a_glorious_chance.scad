@@ -1,4 +1,5 @@
 // Legion Wargames — A Glorious Chance
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/legion_wargames_constants.scad>
 
 // 288 square 5/8

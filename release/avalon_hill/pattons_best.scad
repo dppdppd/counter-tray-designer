@@ -1,4 +1,5 @@
 // The Avalon Hill Game Co — Patton's Best
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/avalon_hill_constants.scad>
 
 PATTONS_BEST =

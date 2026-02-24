@@ -1,4 +1,5 @@
 // Decision Games — RAF
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/decision_games_constants.scad>
 
 RAF =

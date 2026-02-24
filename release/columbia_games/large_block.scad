@@ -1,4 +1,5 @@
 // Columbia Games — Large Block (e.g. Caesar)
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/columbia_games_constants.scad>
 
 columbia_block_large = [25, 25, 12.8];

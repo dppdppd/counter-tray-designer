@@ -1,4 +1,5 @@
 // Blue Panther LLC — Chipboard Halfsheet
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/blue_panther_constants.scad>
 
 CHIPBOARD_HALFSHEET =

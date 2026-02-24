@@ -1,4 +1,5 @@
 // GMT Games — The U.S. Civil War
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/gmt_constants.scad>
 
 THE_US_CIVIL_WAR = // print x6

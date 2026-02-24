@@ -1,4 +1,5 @@
 // Ingenioso Hidalgo — Battlefields of the Napoleonic Wars
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/ingenioso_hidalgo_constants.scad>
 
 BotNW =

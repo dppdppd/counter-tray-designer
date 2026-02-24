@@ -1,4 +1,5 @@
 // West End Games — Tales of the Arabian Nights
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/west_end_games_constants.scad>
 
 TALES_OF_THE_ARABIAN_NIGHTS =

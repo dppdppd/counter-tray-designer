@@ -1,4 +1,5 @@
 // The Avalon Hill Game Co — Caesar: Alesia
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/avalon_hill_constants.scad>
 
 CAESAR_ALESIA =

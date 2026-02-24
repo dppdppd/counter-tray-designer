@@ -1,4 +1,5 @@
 // Conflict Games — Bar-Lev
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/conflict_games_constants.scad>
 
 BAR_LEV =

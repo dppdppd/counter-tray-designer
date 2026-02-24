@@ -1,4 +1,5 @@
 // Victory Games — The Civil War
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/victory_games_constants.scad>
 
 THE_CIVIL_WAR =

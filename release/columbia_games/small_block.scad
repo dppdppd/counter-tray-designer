@@ -1,4 +1,5 @@
 // Columbia Games — Small Block (e.g. Victory in the Pacific)
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/columbia_games_constants.scad>
 
 columbia_block_small = [20.6, 20.6, 11 ];

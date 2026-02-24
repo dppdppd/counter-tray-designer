@@ -1,4 +1,5 @@
 // Victory Games — The Korean War
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/victory_games_constants.scad>
 
 THE_KOREAN_WAR = // print x2

@@ -1,4 +1,5 @@
 // GMT Games — Tomahawks and Bayonets
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/gmt_constants.scad>
 
 TOMAHAWKS_AND_BAYONETS =

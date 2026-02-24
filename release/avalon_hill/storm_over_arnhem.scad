@@ -1,4 +1,5 @@
 // The Avalon Hill Game Co — Storm Over Arnhem (1981)
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/avalon_hill_constants.scad>
 
 STORM_OVER_ARNHEM =

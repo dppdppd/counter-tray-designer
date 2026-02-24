@@ -1,4 +1,5 @@
 // The Avalon Hill Game Co — Breakout: Normandy
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/avalon_hill_constants.scad>
 
 // large 19.5 x 19.5 — 88 x 2

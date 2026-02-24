@@ -1,4 +1,5 @@
 // GMT Games — 1862: Railway Mania in the Eastern Counties
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/gmt_constants.scad>
 
 tile_depth = 2.8;

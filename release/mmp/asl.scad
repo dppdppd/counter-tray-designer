@@ -1,4 +1,5 @@
 // Multi-Man Publishing — Advanced Squad Leader
+include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/mmp_constants.scad>
 
 asl_small = [ half_inch_counter, half_inch_counter, half_inch_counter];
