@@ -1,4 +1,3 @@
-include <counter_tray_designer_lib.1.scad>
 
 tray_letter = [215,250];
 tray_gmt = [ 230,250];
