@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Bash(timeout 60 openscad:*)",
+      "Bash(timeout 120 xvfb-run:*)",
+      "Bash(timeout 300 xvfb-run -a openscad:*)",
+      "Bash(./tests/run_tests.sh:*)",
+      "WebSearch"
+    ]
+  }
+}
