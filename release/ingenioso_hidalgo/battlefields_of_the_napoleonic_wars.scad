@@ -12,15 +12,17 @@ BotNW =
     [G_FRAME_STYLE_N, 3],
     [COUNTER_PEDESTAL_B, false],
 
-    [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, [17, 16, 6]],
-        [ROWS_N, 1],
+    [TRAY,
+        [COUNTER_SET,
+            [COUNTER_SIZE_XYZ, [17, 16, 6]],
+            [ROWS_N, 1],
 
-    ],
+        ],
 
-    [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, [25, 15, 11]],
-        [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, 0.2],
+        [COUNTER_SET,
+            [COUNTER_SIZE_XYZ, [25, 15, 11]],
+            [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, 0.2],
+        ],
     ],
 ];
 

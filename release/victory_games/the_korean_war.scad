@@ -9,8 +9,10 @@ THE_KOREAN_WAR = // print x2
 
   //  [G_DIMENSIONS_XY, [197,282]],
 
-    [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, standard_cardboard_counter],
+    [TRAY,
+        [COUNTER_SET,
+            [COUNTER_SIZE_XYZ, standard_cardboard_counter],
+        ],
     ],
 ];
 

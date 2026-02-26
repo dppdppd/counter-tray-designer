@@ -9,10 +9,12 @@ CAESAR_ALESIA =
     // neutral: 48
     [G_DIMENSIONS_XY, [348,178]],
 
-    [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, [half_inch_counter, half_inch_counter, counter_depth_standard_cardboard]],
-    ],
+    [TRAY,
+        [COUNTER_SET,
+            [COUNTER_SIZE_XYZ, [half_inch_counter, half_inch_counter, counter_depth_standard_cardboard]],
+        ],
 
+    ],
 ];
 
 Make(CAESAR_ALESIA);

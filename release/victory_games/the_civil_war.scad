@@ -11,9 +11,11 @@ THE_CIVIL_WAR =
     [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .4],
     [G_FRAME_STYLE_N, 3],
 
-    [COUNTER_SET,
-        [COUNTER_SIZE_XYZ,
-        [ old_half_inch_counter, old_half_inch_counter, 1.8*4]],
+    [TRAY,
+        [COUNTER_SET,
+            [COUNTER_SIZE_XYZ,
+            [ old_half_inch_counter, old_half_inch_counter, 1.8*4]],
+        ],
     ],
 ];
 

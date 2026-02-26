@@ -6,10 +6,12 @@ CHIPBOARD_HALFSHEET =
 [
     [G_DIMENSIONS_XY, [208,156]],
 
-    [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, blue_panther_chipboard_depth]],
-    ],
+    [TRAY,
+        [COUNTER_SET,
+            [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, blue_panther_chipboard_depth]],
+        ],
 
+    ],
 ];
 
 Make(CHIPBOARD_HALFSHEET);

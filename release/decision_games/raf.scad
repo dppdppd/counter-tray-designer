@@ -16,8 +16,10 @@ RAF =
     [G_FRAME_STYLE_N, 3],
   //  [G_MAGNET_DIAMETER_N, 10.2],
 
-    [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, 2]],
+    [TRAY,
+        [COUNTER_SET,
+            [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, 2]],
+        ],
     ],
 ];
 

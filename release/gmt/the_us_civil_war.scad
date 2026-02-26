@@ -9,8 +9,10 @@ THE_US_CIVIL_WAR = // print x6
 
   //  [G_DIMENSIONS_XY, [197,282]],
 
-    [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, gmt_nine_sixteenths_counter],
+    [TRAY,
+        [COUNTER_SET,
+            [COUNTER_SIZE_XYZ, gmt_nine_sixteenths_counter],
+        ],
     ],
 ];
 

@@ -18,13 +18,15 @@ SEIGE_OF_JERUSALEM =
 
     [G_DIMENSIONS_XY, [280,338]],
 
-    [COUNTER_SET,
-        [ROWS_N, 6],
-        [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, counter_depth_standard_cardboard]],
-    ],
+    [TRAY,
+        [COUNTER_SET,
+            [ROWS_N, 6],
+            [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, counter_depth_standard_cardboard]],
+        ],
 
-    [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, [half_inch_counter, half_inch_counter, counter_depth_standard_cardboard]],
+        [COUNTER_SET,
+            [COUNTER_SIZE_XYZ, [half_inch_counter, half_inch_counter, counter_depth_standard_cardboard]],
+        ],
     ],
 ];
 

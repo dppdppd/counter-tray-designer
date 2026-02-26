@@ -7,8 +7,10 @@ BAR_LEV =
     // box dimensions 205x285
     [G_DIMENSIONS_XY, [200,267]],
 
-    [COUNTER_SET,
-        [COUNTER_SIZE_XYZ, [16, 16, counter_depth_standard_cardboard]],
+    [TRAY,
+        [COUNTER_SET,
+            [COUNTER_SIZE_XYZ, [16, 16, counter_depth_standard_cardboard]],
+        ],
     ],
 ];
 
