@@ -11,10 +11,10 @@ THE_KOREAN_WAR = // print x2
         [COUNTER_SET,
             [COUNTER_SIZE_XYZ, standard_cardboard_counter],
         ],
-        [TRAY_PRINT_COUNT_N, 2]
+        [PRINT_COUNT_N, 2]
 
     ],
-    
+
     [LID],
 ];
 

@@ -14,7 +14,7 @@ BREAKOUT_NORMANDY =
         [COUNTER_SET,
             [COUNTER_SIZE_XYZ, [half_inch_counter, half_inch_counter, counter_depth_standard_cardboard]],
         ],
-        [TRAY_PRINT_COUNT_N, 2]
+        [PRINT_COUNT_N, 2]
 
     ],
 
@@ -22,7 +22,7 @@ BREAKOUT_NORMANDY =
         [COUNTER_SET,
             [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, counter_depth_standard_cardboard]],
         ],
-        [TRAY_PRINT_COUNT_N, 2]
+        [PRINT_COUNT_N, 2]
 
     ],
 

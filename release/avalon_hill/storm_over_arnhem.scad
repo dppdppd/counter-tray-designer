@@ -19,7 +19,7 @@ STORM_OVER_ARNHEM =
         [COUNTER_SET,
             [COUNTER_SIZE_XYZ, [19.5, 19.5, counter_depth_standard_cardboard]],
         ],
-        [TRAY_PRINT_COUNT_N, 2]
+        [PRINT_COUNT_N, 2]
     ],
 
     [TRAY, // print x 1 — dice chits

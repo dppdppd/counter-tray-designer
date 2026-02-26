@@ -11,7 +11,7 @@ THE_US_CIVIL_WAR = // print x6
         [COUNTER_SET,
             [COUNTER_SIZE_XYZ, gmt_nine_sixteenths_counter],
         ],
-        [TRAY_PRINT_COUNT_N, 6]
+        [PRINT_COUNT_N, 6]
 
     ],
     [LID],

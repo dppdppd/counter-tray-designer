@@ -30,7 +30,7 @@ GMT_1862 =
             [COUNTER_SIZE_XYZ, [45, 33.83, 12]],
             [COUNTER_HOLE_FRACTION_N, 0],
         ],
-        [TRAY_PRINT_COUNT_N, 2]
+        [PRINT_COUNT_N, 2]
 
     ],
 

@@ -1,4 +1,4 @@
-// Test: TRAY_PRINT_COUNT_N
+// Test: PRINT_COUNT_N
 // Verifies that a tray with print count > 1 generates multiple copies
 // in the grid layout. Tray 1 (print x2) + Tray 2 (print x1) = 3 virtual trays.
 
@@ -10,7 +10,7 @@ TEST_PRINT_COUNT =
     [G_FRAME_STYLE_N, 4],
 
     [TRAY,
-        [TRAY_PRINT_COUNT_N, 2],
+        [PRINT_COUNT_N, 2],
         [G_DIMENSIONS_XY, [40, 40]],
         [COUNTER_SET,
             [COUNTER_SIZE_XYZ, [12, 12, 4]],
