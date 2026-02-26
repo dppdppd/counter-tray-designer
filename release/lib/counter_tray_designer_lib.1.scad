@@ -31,7 +31,7 @@ _DEBUG_B = "_debug";
 
 //tray
 TRAY = "TRAY";
-TRAY_PRINT_COUNT_N = "TRAY_PRINT_COUNT_N";
+PRINT_COUNT_N = "PRINT_COUNT_N";
 G_GRID_COLUMNS_N = "G_GRID_COLUMNS_N";
 G_GRID_SPACING_N = "G_GRID_SPACING_N";
 
@@ -99,31 +99,34 @@ function build_effective_tray_data(tray_entry, top_globals) =
     concat(get_tray_contents(tray_entry), top_globals);
 
 // Grid item system: TRAY and LID entries are both grid items.
-// TRAYs expand by TRAY_PRINT_COUNT_N; each LID counts as 1 item.
+// Both expand by PRINT_COUNT_N (default 1).
 
 function _count_grid_items(data, top_globals, idx = 0) =
     idx >= len(data) ? 0 :
     get_key(data[idx]) == TRAY ?
         let(eff = build_effective_tray_data(data[idx], top_globals))
-        let(count = find_value(eff, TRAY_PRINT_COUNT_N, default = 1))
+        let(count = find_value(eff, PRINT_COUNT_N, default = 1))
         count + _count_grid_items(data, top_globals, idx + 1) :
     get_key(data[idx]) == LID ?
-        1 + _count_grid_items(data, top_globals, idx + 1) :
+        let(eff = build_effective_tray_data(data[idx], top_globals))
+        let(count = find_value(eff, PRINT_COUNT_N, default = 1))
+        count + _count_grid_items(data, top_globals, idx + 1) :
     _count_grid_items(data, top_globals, idx + 1);
 
 function _grid_item_effective_data(data, top_globals, virtual_idx, idx = 0, accumulated = 0) =
     idx >= len(data) ? [] :
     get_key(data[idx]) == TRAY ?
         let(eff_base = build_effective_tray_data(data[idx], top_globals))
-        let(count = find_value(eff_base, TRAY_PRINT_COUNT_N, default = 1))
+        let(count = find_value(eff_base, PRINT_COUNT_N, default = 1))
         virtual_idx < accumulated + count ?
             concat([[_LID_ENABLED_B, false]], eff_base) :
         _grid_item_effective_data(data, top_globals, virtual_idx, idx + 1, accumulated + count) :
     get_key(data[idx]) == LID ?
-        virtual_idx == accumulated ?
-            concat([[_LID_ENABLED_B, true], [_TRAY_ENABLED_B, false]],
-                   build_effective_tray_data(data[idx], top_globals)) :
-        _grid_item_effective_data(data, top_globals, virtual_idx, idx + 1, accumulated + 1) :
+        let(eff_base = build_effective_tray_data(data[idx], top_globals))
+        let(count = find_value(eff_base, PRINT_COUNT_N, default = 1))
+        virtual_idx < accumulated + count ?
+            concat([[_LID_ENABLED_B, true], [_TRAY_ENABLED_B, false]], eff_base) :
+        _grid_item_effective_data(data, top_globals, virtual_idx, idx + 1, accumulated + count) :
     _grid_item_effective_data(data, top_globals, virtual_idx, idx + 1, accumulated);
 
 function _get_tray_dimensions(effective_data) =
