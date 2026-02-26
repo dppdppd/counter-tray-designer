@@ -20,9 +20,9 @@ ASL =
             [COUNTER_SIZE_XYZ, asl_small],
         ],
     ],
+    [LID],
 
     [TRAY, // large counters
-        [G_MAKE_LID_B, false],
         [G_DIMENSIONS_XY, [
             1 + ( five_eigths_counter + 1 ) * 12 ,
             1 + ( five_eigths_counter + 1 ) * 16]],
@@ -32,7 +32,6 @@ ASL =
     ],
 
     [TRAY, // mixed large + small
-        [G_MAKE_LID_B, false],
         [G_DIMENSIONS_XY, [
             1 + ( five_eigths_counter + 1 ) * 12 ,
             1 + ( five_eigths_counter + 1 ) * 16]],
@@ -61,9 +60,9 @@ ASL_TEST =
             [COUNTER_SIZE_XYZ, asl_large],
         ],
     ],
+    [LID],
 
     [TRAY, // mixed test
-        [G_MAKE_LID_B, false],
         [G_DIMENSIONS_XY, [ 90, 90 ]],
         [G_FRAME_STYLE_N, 4],
         [COUNTER_SET,

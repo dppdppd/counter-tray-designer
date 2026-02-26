@@ -18,6 +18,7 @@ TEST_MULTI_TRAY_OVERRIDE =
             [COUNTER_SIZE_XYZ, [15, 15, 5]],
         ],
     ],
+    [LID],
 
     [TRAY,
         [G_DIMENSIONS_XY, [50, 50]],
@@ -26,6 +27,7 @@ TEST_MULTI_TRAY_OVERRIDE =
             [COUNTER_SIZE_XYZ, [12, 12, 4]],
         ],
     ],
+    [LID],
 ];
 
 Make(TEST_MULTI_TRAY_OVERRIDE);

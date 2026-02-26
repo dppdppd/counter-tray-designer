@@ -14,11 +14,13 @@ PATTONS_BEST =
     ],
 
     [TRAY, // half-inch counters
-        [G_MAKE_LID_B, false],
         [COUNTER_SET,
             [COUNTER_SIZE_XYZ, [half_inch_counter, half_inch_counter, counter_depth_standard_cardboard]],
         ],
     ],
+
+    [LID],
+
 ];
 
 Make(PATTONS_BEST);

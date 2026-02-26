@@ -19,16 +19,19 @@ STORM_OVER_ARNHEM =
         [COUNTER_SET,
             [COUNTER_SIZE_XYZ, [19.5, 19.5, counter_depth_standard_cardboard]],
         ],
+        [TRAY_PRINT_COUNT_N, 2]
     ],
 
     [TRAY, // print x 1 — dice chits
-        [G_MAKE_LID_B, false],
         // small 14 x 14
         // 36 British, 36 German
         [COUNTER_SET,
             [COUNTER_SIZE_XYZ, [14, 14, counter_depth_standard_cardboard]],
         ],
     ],
+
+    [LID],
+
 ];
 
 Make(STORM_OVER_ARNHEM);

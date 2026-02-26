@@ -4,7 +4,6 @@ include <../lib/ingenioso_hidalgo_constants.scad>
 
 BotNW =
 [
-
     [G_DIMENSIONS_XY, [ 131, 148 ]],
 
     [G_FLOOR_THICKNESS_N, 2],
@@ -24,6 +23,8 @@ BotNW =
             [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, 0.2],
         ],
     ],
+    
+    [LID],
 ];
 
 Make(BotNW);

@@ -73,8 +73,9 @@ Pipeline: `.scad` → CSG check → STL export → PNG renders (ortho + edges vi
 
 The engine uses key-based lookup (`find_value`), not positional indexing. Per-tray global resolution: tray-local entries are searched first, then top-level shared defaults.
 
-- **Global keys:** `G_DIMENSIONS_XY`, `G_FLOOR_THICKNESS_N`, `G_MIN_PADDING_XY`, `G_LID_DEPTH_N`, `G_FRAME_STYLE_N` (1-4), `G_MAGNET_DIAMETER_N`, `G_MAKE_TRAY_B`, `G_MAKE_LID_B`
-- **Multi-tray keys:** `TRAY` (grouping marker), `G_GRID_COLUMNS_N` (default = 2), `G_GRID_SPACING_N` (default = 5mm)
+- **Global keys:** `G_DIMENSIONS_XY`, `G_FLOOR_THICKNESS_N`, `G_MIN_PADDING_XY`, `G_LID_DEPTH_N`, `G_FRAME_STYLE_N` (1-4), `G_MAGNET_DIAMETER_N`
+- **Lid keys:** `LID` (peer block to TRAY — place `[LID]` after a TRAY to give it a lid; if any LID blocks exist, trays without a following LID block get no lid)
+- **Multi-tray keys:** `TRAY` (grouping marker), `TRAY_PRINT_COUNT_N` (default = 1, number of copies of this tray to generate in the grid), `G_GRID_COLUMNS_N` (default = 2), `G_GRID_SPACING_N` (default = 5mm)
 - **Per-set keys:** `COUNTER_SIZE_XYZ` (required), `ROWS_N` (auto-computed if omitted, but required for all sets except the last), `COUNTER_SHAPE`, `COUNTER_MARGINS_XY`, `COUNTER_HOLE_FRACTION_N`, `COUNTER_PEDESTAL_B`, `ENABLED_B`
 
 **Frame styles:** Style 1 = border padding with corner magnets. Style 2 = side magnet nubs. Style 3 = side nubs, recentered. Style 4 = no magnets.

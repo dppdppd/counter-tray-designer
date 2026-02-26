@@ -6,8 +6,6 @@ g_make_filler = 0;
 g_make_svg = 0;
 
 // global
-G_MAKE_TRAY_B = "G_MAKE_TRAY_B";
-G_MAKE_LID_B = "G_MAKE_LID_B";
 G_FLOOR_THICKNESS_N = "G_FLOOR_THICKNESS_N";
 G_DIMENSIONS_XY = "G_DIMENSIONS_XY";
 G_MIN_PADDING_XY = "G_MIN_PADDING_XY";
@@ -29,11 +27,17 @@ COUNTER_SET = "COUNTER_SET";
 ROWS_N = "START_ROW";
 COUNTER_SIZE_XYZ = "COUNTER_SIZE_XYZ";
 ENABLED_B = "ENABLED_B";
+_DEBUG_B = "_debug";
 
 //tray
 TRAY = "TRAY";
+TRAY_PRINT_COUNT_N = "TRAY_PRINT_COUNT_N";
 G_GRID_COLUMNS_N = "G_GRID_COLUMNS_N";
 G_GRID_SPACING_N = "G_GRID_SPACING_N";
+
+//lid
+LID = "LID";
+_LID_ENABLED_B = "_LID_ENABLED_B"; // internal key
 
 // values
 SHAPE_SQUARE = "SHAPE_SQUARE";
@@ -82,7 +86,7 @@ function get_tray(data, tray_idx, idx = 0) =
 
 function get_top_level_globals(data, idx = 0) =
     idx >= len(data) ? [] :
-    (get_key(data[idx]) != TRAY && get_key(data[idx]) != COUNTER_SET) ?
+    (get_key(data[idx]) != TRAY && get_key(data[idx]) != COUNTER_SET && get_key(data[idx]) != LID) ?
         concat([data[idx]], get_top_level_globals(data, idx + 1)) :
         get_top_level_globals(data, idx + 1);
 
@@ -93,14 +97,50 @@ function get_tray_contents(tray_entry, idx = 1) =
 function build_effective_tray_data(tray_entry, top_globals) =
     concat(get_tray_contents(tray_entry), top_globals);
 
+function _has_lid_blocks(data) = count_keys(data, LID) > 0;
+
+function _find_tray_raw_index(data, tray_idx, idx = 0, count = 0) =
+    idx >= len(data) ? -1 :
+    get_key(data[idx]) == TRAY ?
+        (count == tray_idx ? idx : _find_tray_raw_index(data, tray_idx, idx + 1, count + 1)) :
+        _find_tray_raw_index(data, tray_idx, idx + 1, count);
+
+function _tray_has_lid_block(data, tray_idx) =
+    let(raw_idx = _find_tray_raw_index(data, tray_idx))
+    raw_idx >= 0 && raw_idx + 1 < len(data) && get_key(data[raw_idx + 1]) == LID;
+
+function _get_lid_contents(data, tray_idx) =
+    let(raw_idx = _find_tray_raw_index(data, tray_idx))
+    get_tray_contents(data[raw_idx + 1]);
+
+function _build_effective_data_with_lid(data, tray_idx, top_globals) =
+    let(base = build_effective_tray_data(get_tray(data, tray_idx), top_globals))
+    !_has_lid_blocks(data) ? base :
+    !_tray_has_lid_block(data, tray_idx) ?
+        concat([[_LID_ENABLED_B, false]], base) :
+        concat([[_LID_ENABLED_B, true]], _get_lid_contents(data, tray_idx), base);
+
+function _get_tray_print_count(effective_data) =
+    find_value(effective_data, TRAY_PRINT_COUNT_N, default = 1);
+
+function _get_expanded_tray_count(data, top_globals, source_idx = 0) =
+    source_idx >= count_keys(data, TRAY) ? 0 :
+    let(eff = _build_effective_data_with_lid(data, source_idx, top_globals))
+    _get_tray_print_count(eff) + _get_expanded_tray_count(data, top_globals, source_idx + 1);
+
+function _expanded_to_source(data, top_globals, virtual_idx, source_idx = 0, accumulated = 0) =
+    let(eff = _build_effective_data_with_lid(data, source_idx, top_globals))
+    let(count = _get_tray_print_count(eff))
+    virtual_idx < accumulated + count ? source_idx :
+    _expanded_to_source(data, top_globals, virtual_idx, source_idx + 1, accumulated + count);
+
 function _get_tray_dimensions(effective_data) =
     find_value(effective_data, G_DIMENSIONS_XY, default = [50, 50]);
 
 function _get_tray_total_width(effective_data) =
     let(dims = _get_tray_dimensions(effective_data))
-    let(mt = find_value(effective_data, G_MAKE_TRAY_B, default = true))
-    let(ml = find_value(effective_data, G_MAKE_LID_B, default = true))
-    (mt && ml) ? dims.x * 2 + 50 : dims.x;
+    let(ml = find_value(effective_data, _LID_ENABLED_B, default = true))
+    ml ? dims.x * 2 + 50 : dims.x;
 
 function _get_row_x_offset(data, top_globals, tray_idx, grid_cols, spacing) =
     let(row_start = floor(tray_idx / grid_cols) * grid_cols)
@@ -108,14 +148,16 @@ function _get_row_x_offset(data, top_globals, tray_idx, grid_cols, spacing) =
 
 function _get_row_x_offset_r(data, top_globals, tray_idx, cur, spacing) =
     cur >= tray_idx ? 0 :
-    let(eff = build_effective_tray_data(get_tray(data, cur), top_globals))
+    let(source = _expanded_to_source(data, top_globals, cur))
+    let(eff = _build_effective_data_with_lid(data, source, top_globals))
     let(w = _get_tray_total_width(eff))
     w + spacing + _get_row_x_offset_r(data, top_globals, tray_idx, cur + 1, spacing);
 
 function _get_row_max_height(data, top_globals, row, grid_cols, num_trays, col = 0, max_h = 0) =
     let(idx = row * grid_cols + col)
     (col >= grid_cols || idx >= num_trays) ? max_h :
-    let(eff = build_effective_tray_data(get_tray(data, idx), top_globals))
+    let(source = _expanded_to_source(data, top_globals, idx))
+    let(eff = _build_effective_data_with_lid(data, source, top_globals))
     let(dims = _get_tray_dimensions(eff))
     _get_row_max_height(data, top_globals, row, grid_cols, num_trays, col + 1, max(max_h, dims.y));
 
@@ -138,14 +180,14 @@ module Make( DATA = DATA )
     else
     {
         _top_globals = get_top_level_globals(DATA);
-        _num_trays = count_keys(DATA, TRAY);
+        _num_trays = _get_expanded_tray_count(DATA, _top_globals);
         _grid_cols = find_value(DATA, G_GRID_COLUMNS_N, default = 2);
         _tray_spacing = find_value(DATA, G_GRID_SPACING_N, default = 50);
 
         for ( tray_idx = [0 : _num_trays - 1] )
         {
-            _tray_entry = get_tray(DATA, tray_idx);
-            _effective_data = build_effective_tray_data(_tray_entry, _top_globals);
+            _source_idx = _expanded_to_source(DATA, _top_globals, tray_idx);
+            _effective_data = _build_effective_data_with_lid(DATA, _source_idx, _top_globals);
             _x_offset = _get_row_x_offset(DATA, _top_globals, tray_idx, _grid_cols, _tray_spacing);
             _y_offset = _get_col_y_offset(DATA, _top_globals, tray_idx, _grid_cols, _tray_spacing, _num_trays);
 
@@ -178,8 +220,7 @@ module _MakeSingleTray( DATA )
     /////////////////////////////////////////
  
     _floor_thickness = find_value( DATA, G_FLOOR_THICKNESS_N, default = 1.5);
-    make_tray = find_value( DATA, G_MAKE_TRAY_B, default = true);
-    make_lid = find_value( DATA, G_MAKE_LID_B, default = true);
+    make_lid = find_value( DATA, _LID_ENABLED_B, default = true);
     frame_style = find_value( DATA, G_FRAME_STYLE_N, default = 1);
     magnet_diameter = find_value( DATA, G_MAGNET_DIAMETER_N, default = 6.2 );
 
@@ -241,6 +282,13 @@ module _MakeSingleTray( DATA )
     g_tolerance = 0.1;
 
     function is_enabled(setidx) = find_value( get_set( setidx ), ENABLED_B, default = true);
+    function is_debug(setidx) = find_value( get_set( setidx ), _DEBUG_B, default = false);
+
+    module _MaybeDebug( do_debug )
+    {
+        if ( do_debug ) # children();
+        else children();
+    }
 
     function get_counter_size( setidx ) = find_value( get_set( setidx ), COUNTER_SIZE_XYZ, default = [1,1,1]);
     function get_counter_shape( setidx ) = find_value( get_set( setidx ), COUNTER_SHAPE, default = g_counter_shape);
@@ -317,7 +365,7 @@ module _MakeSingleTray( DATA )
     for( i = [0:num_sets-2])
         assert(num_rows_raw(i) != -1, "All Sets (expect for the last set) must specify ROWS_N" );
 
-    if ( make_tray && !g_make_svg )
+    if ( !g_make_svg )
     {
 
         difference() {
@@ -497,9 +545,10 @@ module _MakeSingleTray( DATA )
                             ", total=",
                             get_num_counters(setidx).x * get_num_counters(setidx).y));
 
+                        _MaybeDebug( is_debug(setidx) )
                         translate( [get_set_x_position(setidx), get_set_y_position(setidx) + all_sets_y_offset ,0])
                         create_set_of_counter_holes( setidx );
-                        
+
                     }
                 }
             }
@@ -509,6 +558,7 @@ module _MakeSingleTray( DATA )
         {	
             if ( is_enabled(setidx) )
             {
+                _MaybeDebug( is_debug(setidx) )
                 translate( [get_set_x_position(setidx), get_set_y_position(setidx) + all_sets_y_offset ,0])
                 {
                     color( rands(0, 1, 3) )
@@ -653,11 +703,8 @@ module _MakeSingleTray( DATA )
 
     module place_lid ()
     {
-        if (make_tray)
-            translate( [tray_size_3d.x + 50, 0, 0])
-                children();
-            else
-                children();
+        translate( [tray_size_3d.x + 50, 0, 0])
+            children();
     }
 
     module create_lid()

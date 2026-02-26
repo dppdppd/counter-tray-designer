@@ -26,11 +26,13 @@ A_GLORIOUS_CHANCE =
     ],
 
     [TRAY, // double-depth square counters
-        [G_MAKE_LID_B, false],
         [COUNTER_SET,
             [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, counter_depth_standard_cardboard*2]],
         ],
     ],
+        
+    [LID],
+
 ];
 
 Make(A_GLORIOUS_CHANCE);

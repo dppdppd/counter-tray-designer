@@ -28,6 +28,8 @@ SEIGE_OF_JERUSALEM =
             [COUNTER_SIZE_XYZ, [half_inch_counter, half_inch_counter, counter_depth_standard_cardboard]],
         ],
     ],
+    
+    [LID],
 ];
 
 Make(SEIGE_OF_JERUSALEM);

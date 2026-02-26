@@ -15,6 +15,8 @@ CAESAR_ALESIA =
         ],
 
     ],
+    
+    [LID],
 ];
 
 Make(CAESAR_ALESIA);

@@ -7,7 +7,6 @@ TEST_GRID =
 [
     [G_FLOOR_THICKNESS_N, 2],
     [G_FRAME_STYLE_N, 4],
-    [G_MAKE_LID_B, false],
     [G_GRID_COLUMNS_N, 2],
     [G_GRID_SPACING_N, 5],
 

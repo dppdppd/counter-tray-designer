@@ -12,6 +12,8 @@ BAR_LEV =
             [COUNTER_SIZE_XYZ, [16, 16, counter_depth_standard_cardboard]],
         ],
     ],
+    
+    [LID],
 ];
 
 Make(BAR_LEV);

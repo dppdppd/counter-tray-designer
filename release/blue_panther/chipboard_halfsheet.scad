@@ -12,6 +12,8 @@ CHIPBOARD_HALFSHEET =
         ],
 
     ],
+    
+    [LID],
 ];
 
 Make(CHIPBOARD_HALFSHEET);

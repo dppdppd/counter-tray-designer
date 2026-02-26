@@ -1,6 +1,6 @@
 // Hollandspiele — Meltwater
 include <../lib/counter_tray_designer_lib.1.scad>
-include <../lib/hollandspiele_constants.scad>
+include <../lib/blue_panther_constants.scad>
 
 MELTWATER =
 [
@@ -14,9 +14,11 @@ MELTWATER =
         ],
 
         [COUNTER_SET,
-            [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, 3.2]], // blue panther chipboard depth
+            [COUNTER_SIZE_XYZ, [five_eigths_counter, five_eigths_counter, blue_panther_chipboard_depth]],
         ],
     ],
+    
+    [LID],
 ];
 
 Make(MELTWATER);

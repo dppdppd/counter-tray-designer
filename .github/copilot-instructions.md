@@ -5,7 +5,8 @@
 - Entry points: include `counter_tray_designer_lib.1.scad` then call `Make(DATA_ARRAY)`; `tray-library.scad` demonstrates calling `Make(BFNW);` at the bottom.
 - Data model (all values are millimeters unless noted):
   - Top-level `DATA_ARRAY` is a list of `[KEY, VALUE]` pairs plus repeated `[COUNTER_SET, [...]]` blocks.
-  - Global keys: `G_DIMENSIONS_XY` (tray outer X/Y), `G_FLOOR_THICKNESS_N` (default 1.5), `G_MIN_PADDING_XY` (default `[magnet_outer_diameter,1]` when using magnets), `G_LID_DEPTH_N` (default 2.6), `G_FRAME_STYLE_N` (default 1; affects magnets/notches), `G_MAGNET_DIAMETER_N` (default 6.2), `G_MAKE_TRAY_B`/`G_MAKE_LID_B` toggles.
+  - Global keys: `G_DIMENSIONS_XY` (tray outer X/Y), `G_FLOOR_THICKNESS_N` (default 1.5), `G_MIN_PADDING_XY` (default `[magnet_outer_diameter,1]` when using magnets), `G_LID_DEPTH_N` (default 2.6), `G_FRAME_STYLE_N` (default 1; affects magnets/notches), `G_MAGNET_DIAMETER_N` (default 6.2).
+  - Lid control: place `[LID]` after a `[TRAY, ...]` entry to give that tray a lid. If any LID blocks exist, trays without a following LID block get no lid. Without any LID blocks (legacy mode), all trays get lids.
   - Set keys inside each `COUNTER_SET`: `COUNTER_SIZE_XYZ` (w,h,depth), optional `ROWS_N` (else auto-computed), `COUNTER_SHAPE` (`SHAPE_SQUARE` default; also circle/triangle/hex), `COUNTER_MARGINS_XY` (defaults to `COUNTER_MARGINS_XY` global or `[0.5,0.5]`), `COUNTER_MARGINS_POST_LENGTH_FRACTION_N` (default 0.25), `COUNTER_HOLE_FRACTION_N` (default 0.7; set 0 to suppress holes), `ENABLED_B` to skip a set.
 - Geometry/logic highlights (from `counter_tray_designer_lib.1.scad`):
   - `$fn` is 20 in preview, 50 when rendering; magnets auto-double if tray is deep (`tray_size_3d.z > 2*magnet_depth+0.2`).
@@ -19,7 +20,7 @@
 - Typical workflow:
   - Edit or define a `DATA_ARRAY` in a `.scad` file, include `counter_tray_designer_lib.1.scad`, and call `Make(DATA_ARRAY);`.
   - Use OpenSCAD GUI: preview (F5) for sizing output printed via `echo`, render (F6) to export STL. Set `g_make_svg=1` to project to 2D for laser cutting templates.
-  - Toggle `G_MAKE_TRAY_B`/`G_MAKE_LID_B` when you only need one part; adjust `G_MAGNET_DIAMETER_N` if using different magnets.
+  - Use `[LID]` blocks after `[TRAY, ...]` entries to control which trays get lids; adjust `G_MAGNET_DIAMETER_N` if using different magnets.
 - Conventions:
   - All dimensions are mm; keep arrays ordered as shown (globals before sets) for readability though lookup is key-based.
   - Prefer updating `tray-library.scad` with reusable presets; keep experimental layouts behind `TESTING` flag rather than replacing the default `Make` call.

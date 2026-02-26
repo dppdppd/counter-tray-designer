@@ -19,20 +19,22 @@ GMT_1862 =
     ],
 
     [TRAY, // square tokens
-        [G_MAKE_LID_B, false],
         [COUNTER_SET,
             [COUNTER_SIZE_XYZ, [33, 33, 8]],
         ],
     ],
 
-    [TRAY, // cards — need 2 of these
-        [G_MAKE_LID_B, false],
+    [TRAY, // cards — x2
         [COUNTER_MARGINS_POST_LENGTH_FRACTION_N, .6],
         [COUNTER_SET,
             [COUNTER_SIZE_XYZ, [45, 33.83, 12]],
             [COUNTER_HOLE_FRACTION_N, 0],
         ],
+        [TRAY_PRINT_COUNT_N, 2]
+
     ],
+
+    [LID],
 ];
 
 Make(GMT_1862);

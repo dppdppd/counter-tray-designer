@@ -17,6 +17,8 @@ THE_CIVIL_WAR =
             [ old_half_inch_counter, old_half_inch_counter, 1.8*4]],
         ],
     ],
+
+    [LID],
 ];
 
 Make(THE_CIVIL_WAR);
