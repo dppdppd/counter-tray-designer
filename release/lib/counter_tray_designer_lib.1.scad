@@ -71,7 +71,7 @@ function count_keys( table, key, start = 0, stop = -1, idx = 0, sum = 0 ) =
 ///////////////////////////////////////////////////////////////////////
 
 function is_preview() =  $preview;
-$fn = is_preview() ? 20 : 50;
+$fn = is_preview() ? 10 : 30;
 
 ///////////////////////////////////////////////////////////////////////
 // TRAY hierarchy helpers
