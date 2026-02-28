@@ -303,10 +303,12 @@ module _MakeSingleTray( DATA )
 
     function num_rows_raw( setidx ) = find_value( get_set( setidx ), ROWS_N, default = -1);
 
-    function get_num_rows( setidx ) = 
+    function get_num_rows( setidx ) =
         let( num_rows_raw = num_rows_raw( setidx ))
         num_rows_raw > 0 ?
         num_rows_raw :
+        setidx < num_sets - 1 ?
+        1 :
         let( y_pos = get_set_y_position( setidx ))
         floor((usable_area.y - y_pos ) / get_counter_size_outer(setidx).y);
 
@@ -340,7 +342,7 @@ module _MakeSingleTray( DATA )
         setidx < stop ?
             let( counter_size_y = get_counter_size(setidx).y)
             let( counter_size_outer_y = counter_size_y + 2 * get_counter_margins().y)
-            let( num_rows = num_rows_raw(setidx))        
+            let( num_rows = get_num_rows(setidx))
             let (offset = get_counter_margins().y * 2 )
             let (y_new =  is_enabled(setidx)? y + offset + ( num_rows * counter_size_outer_y) : y)
             get_set_y_position( stop, setidx + 1, y_new ) :
@@ -357,7 +359,8 @@ module _MakeSingleTray( DATA )
 
     if ( num_sets > 1 )
     for( i = [0:num_sets-2])
-        assert(num_rows_raw(i) != -1, "All Sets (expect for the last set) must specify ROWS_N" );
+        if (num_rows_raw(i) == -1)
+            echo(str("WARNING: COUNTER_SET #", i+1, " does not specify ROWS_N. Defaulting to 1 row."));
 
     if ( make_tray_body && !g_make_svg )
     {
