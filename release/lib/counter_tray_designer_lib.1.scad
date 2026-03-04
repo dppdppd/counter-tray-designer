@@ -27,7 +27,7 @@ COUNTER_SET = "COUNTER_SET";
 ROWS_N = "START_ROW";
 COUNTER_SIZE_XYZ = "COUNTER_SIZE_XYZ";
 ENABLED_B = "ENABLED_B";
-_DEBUG_B = "_debug";
+DEBUG_B = "_debug";
 
 //tray
 TRAY = "TRAY";
@@ -276,7 +276,7 @@ module _MakeSingleTray( DATA )
     g_tolerance = 0.1;
 
     function is_enabled(setidx) = find_value( get_set( setidx ), ENABLED_B, default = true);
-    function is_debug(setidx) = find_value( get_set( setidx ), _DEBUG_B, default = false);
+    function is_debug(setidx) = find_value( get_set( setidx ), DEBUG_B, default = false);
 
     module _MaybeDebug( do_debug )
     {
