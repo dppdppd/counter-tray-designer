@@ -12,12 +12,40 @@ Download portable binaries from the [BGSD Releases](https://github.com/dppdppd/B
 
 1. Download [OpenSCAD](https://www.openscad.org)
 2. Clone or download this repository
-3. Copy `release/my_designs/starter.scad` into your own designs folder
+3. Copy an existing design from a publisher folder in `release/` (e.g. `release/gmt/1862.scad`) as a starting point
 4. Open your copy in a text editor and in OpenSCAD
 5. In OpenSCAD, enable **Design > Automatic Reload and Preview**
 6. Edit, save, and iterate
 
-## Need Help?
+## Repository structure
+
+- Default branch: `master`
+- Library engine: `release/lib/counter_tray_designer_lib.1.scad`
+- Global constants: `release/lib/global_constants.scad`
+- Publisher constants: `release/lib/<publisher>_constants.scad` (e.g. `gmt_constants.scad`)
+- Design files are organized by publisher: `release/<publisher>/<game>.scad` (e.g. `release/gmt/1862.scad`)
+- Each design file includes the library and its publisher constants:
+  ```
+  include <../lib/counter_tray_designer_lib.1.scad>
+  include <../lib/gmt_constants.scad>
+  ```
+- Tests live in `tests/scad/test_*.scad`
+
+### Current publishers
+
+avalon_hill, blue_panther, columbia_games, conflict_games, decision_games, gmt, hollandspiele, ingenioso_hidalgo, legion_wargames, mmp, victory_games, west_end_games
+
+## Contributing
+
+### Submitting a design
+
+To contribute a design, fork this repo, add your `.scad` file to the appropriate publisher folder under `release/` (e.g. `release/gmt/my_game.scad`), and open a pull request against the `master` branch. If your publisher doesn't have a folder yet, create one and add a corresponding `release/lib/<publisher>_constants.scad` file (see existing ones for the pattern).
+
+### Reporting bugs
+
+Open an issue at https://github.com/dppdppd/counter-tray-designer/issues with a description of the problem and, if possible, the `.scad` file that reproduces it.
+
+## Need help?
 
 Start a guided conversation with an AI assistant:
 
