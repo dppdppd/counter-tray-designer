@@ -1,3 +1,3 @@
 include <global_constants.scad>
 
-blue_panther_chipboard_depth = 3.2;
+blue_panther_chipboard_depth = 3.2; // @preset COUNTER_SIZE_Z "chipboard"
