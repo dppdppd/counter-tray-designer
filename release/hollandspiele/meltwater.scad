@@ -1,3 +1,9 @@
+/*
+ * Counter Tray Designer
+ * Version: 1.0.2
+ * https://github.com/dppdppd/counter-tray-designer
+ */
+
 // Hollandspiele — Meltwater
 include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/blue_panther_constants.scad>

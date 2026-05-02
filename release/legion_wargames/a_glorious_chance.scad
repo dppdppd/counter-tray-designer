@@ -1,3 +1,9 @@
+/*
+ * Counter Tray Designer
+ * Version: 1.0.2
+ * https://github.com/dppdppd/counter-tray-designer
+ */
+
 // Legion Wargames — A Glorious Chance
 include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/legion_wargames_constants.scad>

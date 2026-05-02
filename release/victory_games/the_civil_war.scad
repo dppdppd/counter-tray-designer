@@ -1,3 +1,9 @@
+/*
+ * Counter Tray Designer
+ * Version: 1.0.2
+ * https://github.com/dppdppd/counter-tray-designer
+ */
+
 // Victory Games — The Civil War
 include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/victory_games_constants.scad>

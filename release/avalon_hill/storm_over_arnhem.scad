@@ -1,3 +1,9 @@
+/*
+ * Counter Tray Designer
+ * Version: 1.0.2
+ * https://github.com/dppdppd/counter-tray-designer
+ */
+
 // The Avalon Hill Game Co — Storm Over Arnhem (1981)
 include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/avalon_hill_constants.scad>

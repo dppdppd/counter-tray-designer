@@ -1,3 +1,9 @@
+/*
+ * Counter Tray Designer
+ * Version: 1.0.2
+ * https://github.com/dppdppd/counter-tray-designer
+ */
+
 // GMT Games — The U.S. Civil War
 include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/gmt_constants.scad>

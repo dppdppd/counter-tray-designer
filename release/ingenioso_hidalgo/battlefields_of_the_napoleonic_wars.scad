@@ -1,3 +1,9 @@
+/*
+ * Counter Tray Designer
+ * Version: 1.0.2
+ * https://github.com/dppdppd/counter-tray-designer
+ */
+
 // Ingenioso Hidalgo — Battlefields of the Napoleonic Wars
 include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/ingenioso_hidalgo_constants.scad>

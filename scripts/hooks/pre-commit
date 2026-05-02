@@ -1,17 +1,23 @@
 #!/usr/bin/env bash
-# Stamp VERSION into the lib based on commit count since the v1.0.0 tag.
-# version = "1.0.<N>" where N = (commits since v1.0.0) + 1, accounting for
-# the in-progress commit that hasn't landed yet.
+# Stamp VERSION into every shipped .scad file based on commit count since the
+# v1.0.0 tag. version = "1.0.<N>" where N = (commits since v1.0.0) + 1,
+# accounting for the in-progress commit that hasn't landed yet.
+#
+# - All release/**/*.scad files have a frontmatter line `* Version: X.Y.Z`
+#   that gets rewritten in place.
+# - The library also has a code-level `VERSION = "..."` constant that gets
+#   rewritten too.
 #
 # Activate by running ./scripts/install-hooks.sh once per clone (sets
 # git config core.hooksPath = scripts/hooks).
 set -e
 
-LIB="release/lib/counter_tray_designer_lib.1.scad"
 BASELINE="v1.0.0"
+LIB="release/lib/counter_tray_designer_lib.1.scad"
 
-# Skip silently if the lib file isn't present (rebase, partial checkout, etc).
-[ -f "$LIB" ] || exit 0
+# Skip silently if there are no shipped files (rebase, partial checkout, etc).
+mapfile -t FILES < <(find release -type f -name '*.scad' 2>/dev/null)
+[ ${#FILES[@]} -gt 0 ] || exit 0
 
 # Skip silently if the baseline tag is missing — operator may be on an older
 # branch or doing surgery; don't block the commit.
@@ -26,9 +32,11 @@ NEW_VERSION="1.0.${NEW_PATCH}"
 
 # Idempotent rewrite: -i.bak works on both GNU and BSD sed; the .bak file is
 # removed afterward.
-sed -i.bak "s/^VERSION = \"[^\"]*\";/VERSION = \"${NEW_VERSION}\";/" "$LIB"
-sed -i.bak "s|^ \* Version: .*| * Version: ${NEW_VERSION}|" "$LIB"
-rm -f "${LIB}.bak"
-
-# Stage the (possibly no-op) version edit so it rides along with the commit.
-git add "$LIB"
+for f in "${FILES[@]}"; do
+    sed -i.bak "s|^ \* Version: .*| * Version: ${NEW_VERSION}|" "$f"
+    if [ "$f" = "$LIB" ]; then
+        sed -i.bak "s/^VERSION = \"[^\"]*\";/VERSION = \"${NEW_VERSION}\";/" "$f"
+    fi
+    rm -f "${f}.bak"
+    git add "$f"
+done

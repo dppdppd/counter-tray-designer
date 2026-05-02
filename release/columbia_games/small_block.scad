@@ -1,3 +1,9 @@
+/*
+ * Counter Tray Designer
+ * Version: 1.0.2
+ * https://github.com/dppdppd/counter-tray-designer
+ */
+
 // Columbia Games — Small Block (e.g. Victory in the Pacific)
 include <../lib/counter_tray_designer_lib.1.scad>
 include <../lib/columbia_games_constants.scad>
