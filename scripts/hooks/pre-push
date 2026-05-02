@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# Stamp per-file versions into shipped non-base .scad files when they
+# are part of a push. Each file's version = "1.<N>" where
+# N = (commits touching that file since v1.0.0) + 1, with the +1
+# accounting for the version-bump commit this hook will create.
+#
+# Workflow: this hook bumps versions, makes a commit, then exits 1.
+# Re-run `git push` to send everything — the hook detects its own
+# bump-tip commit on the second invocation and skips, letting the
+# push through.
+#
+# The base lib's project version is handled by the pre-commit hook.
+set -e
+
+BASELINE="v1.0.0"
+LIB="release/lib/counter_tray_designer_lib.1.scad"
+BUMP_MSG="chore: bump per-file versions"
+ZERO="0000000000000000000000000000000000000000"
+
+git rev-parse "$BASELINE" >/dev/null 2>&1 || exit 0
+
+declare -A SEEN
+ANY_BUMPED=0
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    [ "$local_sha" = "$ZERO" ] && continue   # branch deletion
+
+    if [ "$remote_sha" = "$ZERO" ]; then
+        RANGE="${BASELINE}..${local_sha}"
+    else
+        RANGE="${remote_sha}..${local_sha}"
+    fi
+
+    # If the tip commit is a version bump, the work is already done
+    # (this is the second pass after the hook self-amended).
+    LAST_MSG=$(git log -1 --format=%s "$local_sha" 2>/dev/null || true)
+    [ "$LAST_MSG" = "$BUMP_MSG" ] && continue
+
+    # Changed shipped non-base .scad files in the push range.
+    mapfile -t CHANGED < <(git diff --name-only "$RANGE" -- 'release/' ":(exclude)$LIB" 2>/dev/null \
+        | grep '\.scad$' || true)
+    [ ${#CHANGED[@]} -eq 0 ] && continue
+
+    for f in "${CHANGED[@]}"; do
+        [ -f "$f" ] || continue
+        [ -n "${SEEN[$f]:-}" ] && continue
+        SEEN[$f]=1
+
+        FILE_COUNT=$(git rev-list --count "${BASELINE}..${local_sha}" -- "$f" 2>/dev/null || echo 0)
+        NEW_VERSION="1.$((FILE_COUNT + 1))"
+
+        sed -i.bak "s|^ \* Version: .*| * Version: ${NEW_VERSION}|" "$f"
+        rm -f "${f}.bak"
+        git add -- "$f"
+        ANY_BUMPED=1
+    done
+done
+
+if [ "$ANY_BUMPED" -eq 1 ]; then
+    # Let pre-commit run too so the base lib gets its project-version bump.
+    git commit -m "$BUMP_MSG" >/dev/null
+    cat >&2 <<EOF
+
+pre-push: bumped per-file versions and added a commit ($BUMP_MSG).
+Run \`git push\` again to send the bump commit along with your changes.
+EOF
+    exit 1
+fi
