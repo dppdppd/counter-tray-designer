@@ -1,4 +1,4 @@
-VERSION = "1.00";
+VERSION = "1.0.1";
 COPYRIGHT_INFO = "\tCounter Tray Designer\n\thttps://github.com/dppdppd/counter_tray_designer\n\n\tCopyright 2024 Ido Magal\n\tCreative Commons - Attribution - Non-Commercial - Share Alike.\n\thttps://creativecommons.org/licenses/by-nc-sa/4.0/legalcode";
 
 g_make_filler = 0;
