@@ -25,6 +25,10 @@ Download portable binaries from the [BGSD Releases](https://github.com/dppdppd/B
 5. In OpenSCAD, enable **Design > Automatic Reload and Preview**
 6. Edit, save, and iterate
 
+### Preview metadata and print quantities
+
+OpenSCAD preview shows metadata 5 mm beyond the positive-Y edge of every tray and lid panel: an optional centered tray-name header followed by `Print: N`, `Counters: N @ A x B mm`, and `Tray: C x D x E mm`. Set `[NAME, "Player Aid Counters"]` inside a `TRAY` block to identify that tray; the header displays `Player Aid Counters` without a field prefix. Its lid does not inherit the tray label; a lid shows a header only when its own block supplies `NAME`. Unnamed legacy trays keep the existing three-line block. A separate `Full Set: W x D x H mm` block appears once above the complete preview; its width and depth are the largest panel footprint, and its height is the complete stack of every requested tray copy plus its lids. Preview grid rows reserve room for the per-panel labels plus 20 mm of additional Y clearance between trays. The labels use Liberation Mono with padded field names so their colons and values align. For trays containing multiple counter sizes, the size pairs are separated by slashes on the Counters line. `PRINT_COUNT_N` records how many copies should be printed, but the model contains only one copy of each unique panel so repeated geometry does not clutter the preview or exported file. A lid has its own print quantity and label and otherwise inherits its dimensions and counter layout from the preceding tray.
+
 ## Repository structure
 
 - Default branch: `master`
@@ -41,7 +45,7 @@ Download portable binaries from the [BGSD Releases](https://github.com/dppdppd/B
 
 ### Current publishers
 
-avalon_hill, blue_panther, columbia_games, conflict_games, decision_games, gmt, hollandspiele, ingenioso_hidalgo, legion_wargames, mmp, victory_games, west_end_games
+avalon_hill, blue_panther, columbia_games, compass_games, conflict_games, decision_games, gmt, hollandspiele, ingenioso_hidalgo, legion_wargames, mmp, victory_games, west_end_games
 
 ## Contributing
 

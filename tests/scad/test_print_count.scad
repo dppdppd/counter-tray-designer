@@ -1,6 +1,6 @@
 // Test: PRINT_COUNT_N
-// Verifies that a tray with print count > 1 generates multiple copies
-// in the grid layout. Tray 1 (print x2) + Tray 2 (print x1) = 3 virtual trays.
+// Verifies that print count remains panel metadata instead of generating
+// duplicate geometry. Two trays and two lids produce four unique panels.
 
 include <../../release/lib/counter_tray_designer_lib.1.scad>
 
@@ -26,5 +26,9 @@ TEST_PRINT_COUNT =
     ],
     [LID],
 ];
+
+TEST_PRINT_COUNT_GLOBALS = get_top_level_globals(TEST_PRINT_COUNT);
+assert(_count_grid_items(TEST_PRINT_COUNT, TEST_PRINT_COUNT_GLOBALS) == 4,
+    "PRINT_COUNT_N must not duplicate tray or lid geometry");
 
 Make(TEST_PRINT_COUNT);

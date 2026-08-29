@@ -1,10 +1,10 @@
 /*
  * Counter Tray Designer
- * Version: 1.0.3
+ * Version: 1.0.4
  * https://github.com/dppdppd/counter-tray-designer
  */
 
-VERSION = "1.0.3";
+VERSION = "1.0.4";
 COPYRIGHT_INFO = "\tCounter Tray Designer\n\thttps://github.com/dppdppd/counter_tray_designer\n\n\tCopyright 2024 Ido Magal\n\tCreative Commons - Attribution - Non-Commercial - Share Alike.\n\thttps://creativecommons.org/licenses/by-nc-sa/4.0/legalcode";
 
 g_make_filler = 0;
@@ -37,6 +37,7 @@ DEBUG_B = "_debug";
 
 //tray
 TRAY = "TRAY";
+NAME = "NAME";
 PRINT_COUNT_N = "PRINT_COUNT_N";
 G_GRID_COLUMNS_N = "G_GRID_COLUMNS_N";
 G_GRID_SPACING_N = "G_GRID_SPACING_N";
@@ -101,38 +102,115 @@ function get_tray_contents(tray_entry, idx = 1) =
     idx >= len(tray_entry) ? [] :
     concat([tray_entry[idx]], get_tray_contents(tray_entry, idx + 1));
 
+// Lids use the dimensions and counter sets from the preceding tray, but keep
+// their own print quantity and label. A stack may need several trays and only
+// one lid, and a tray label should never identify the lid.
+function get_tray_contents_for_lid(tray_entry, idx = 1) =
+    idx >= len(tray_entry) ? [] :
+    (get_key(tray_entry[idx]) == PRINT_COUNT_N || get_key(tray_entry[idx]) == NAME) ?
+        get_tray_contents_for_lid(tray_entry, idx + 1) :
+        concat([tray_entry[idx]], get_tray_contents_for_lid(tray_entry, idx + 1));
+
+function get_previous_tray(data, idx) =
+    idx < 0 ? [] :
+    get_key(data[idx]) == TRAY ? data[idx] : get_previous_tray(data, idx - 1);
+
 function build_effective_tray_data(tray_entry, top_globals) =
     concat(get_tray_contents(tray_entry), top_globals);
 
-// Grid item system: TRAY and LID entries are both grid items.
-// Both expand by PRINT_COUNT_N (default 1).
+function build_effective_lid_data(lid_entry, tray_entry, top_globals) =
+    concat(get_tray_contents(lid_entry), get_tray_contents_for_lid(tray_entry), top_globals);
+
+function _get_counter_set(data, set_idx, idx = 0) =
+    idx >= len(data) ? [] :
+    get_key(data[idx]) == COUNTER_SET && count_keys(data, COUNTER_SET, stop = idx) - 1 == set_idx ?
+        data[idx] :
+        _get_counter_set(data, set_idx, idx + 1);
+
+// A tray's printable height is the deepest enabled counter set plus its floor
+// and any required pedestal height. This mirrors _MakeSingleTray's Z sizing.
+function _get_effective_tray_height(effective_data, set_idx = 0, max_height = 0) =
+    let(num_sets = count_keys(effective_data, COUNTER_SET))
+    let(floor_thickness = find_value(effective_data, G_FLOOR_THICKNESS_N, default = 1.5))
+    set_idx < num_sets ?
+        let(set_data = _get_counter_set(effective_data, set_idx))
+        let(enabled = find_value(set_data, ENABLED_B, default = true))
+        let(counter_size = find_value(set_data, COUNTER_SIZE_XYZ, default = [1, 1, 1]))
+        let(global_pedestal = find_value(effective_data, COUNTER_PEDESTAL_B, default = true))
+        let(use_pedestal = find_value(set_data, COUNTER_PEDESTAL_B, default = global_pedestal))
+        let(global_pedestal_min = find_value(effective_data, COUNTER_PEDESTAL_MIN, default = 0))
+        let(pedestal_min = find_value(set_data, COUNTER_PEDESTAL_MIN, default = global_pedestal_min))
+        let(set_height = enabled ? counter_size.z + floor_thickness + (use_pedestal ? pedestal_min : 0) : 0)
+        _get_effective_tray_height(effective_data, set_idx + 1, max(max_height, set_height)) :
+        max(max_height, floor_thickness);
+
+// Total stack height sums every requested tray copy and lid in the design.
+// It forms the Z dimension of the single full-set preview block.
+function _get_total_stack_height(data, top_globals, idx = 0, total = 0) =
+    idx >= len(data) ? total :
+    get_key(data[idx]) == TRAY ?
+        let(effective_data = build_effective_tray_data(data[idx], top_globals))
+        let(print_count = find_value(effective_data, PRINT_COUNT_N, default = 1))
+        _get_total_stack_height(
+            data,
+            top_globals,
+            idx + 1,
+            total + _get_effective_tray_height(effective_data) * print_count
+        ) :
+    get_key(data[idx]) == LID ?
+        let(previous_tray = get_previous_tray(data, idx - 1))
+        let(effective_data = build_effective_lid_data(data[idx], previous_tray, top_globals))
+        let(print_count = find_value(effective_data, PRINT_COUNT_N, default = 1))
+        let(lid_depth = find_value(effective_data, G_LID_DEPTH_N, default = 2.6))
+        _get_total_stack_height(data, top_globals, idx + 1, total + lid_depth * print_count) :
+    _get_total_stack_height(data, top_globals, idx + 1, total);
+
+// The assembled set footprint is the widest and deepest unique panel. Lids
+// inherit their preceding tray dimensions unless they explicitly override them.
+function _get_full_set_dimensions_xy(data, top_globals, idx = 0, max_dimensions = [0, 0]) =
+    idx >= len(data) ? max_dimensions :
+    get_key(data[idx]) == TRAY ?
+        let(effective_data = build_effective_tray_data(data[idx], top_globals))
+        let(dimensions = _get_tray_dimensions(effective_data))
+        _get_full_set_dimensions_xy(
+            data,
+            top_globals,
+            idx + 1,
+            [max(max_dimensions.x, dimensions.x), max(max_dimensions.y, dimensions.y)]
+        ) :
+    get_key(data[idx]) == LID ?
+        let(previous_tray = get_previous_tray(data, idx - 1))
+        let(effective_data = build_effective_lid_data(data[idx], previous_tray, top_globals))
+        let(dimensions = _get_tray_dimensions(effective_data))
+        _get_full_set_dimensions_xy(
+            data,
+            top_globals,
+            idx + 1,
+            [max(max_dimensions.x, dimensions.x), max(max_dimensions.y, dimensions.y)]
+        ) :
+    _get_full_set_dimensions_xy(data, top_globals, idx + 1, max_dimensions);
+
+// Grid item system: every TRAY and LID entry produces one panel. PRINT_COUNT_N
+// is preview metadata for the slicer/operator rather than duplicate geometry.
 
 function _count_grid_items(data, top_globals, idx = 0) =
     idx >= len(data) ? 0 :
-    get_key(data[idx]) == TRAY ?
-        let(eff = build_effective_tray_data(data[idx], top_globals))
-        let(count = find_value(eff, PRINT_COUNT_N, default = 1))
-        count + _count_grid_items(data, top_globals, idx + 1) :
-    get_key(data[idx]) == LID ?
-        let(eff = build_effective_tray_data(data[idx], top_globals))
-        let(count = find_value(eff, PRINT_COUNT_N, default = 1))
-        count + _count_grid_items(data, top_globals, idx + 1) :
-    _count_grid_items(data, top_globals, idx + 1);
+    (get_key(data[idx]) == TRAY || get_key(data[idx]) == LID ? 1 : 0) +
+        _count_grid_items(data, top_globals, idx + 1);
 
 function _grid_item_effective_data(data, top_globals, virtual_idx, idx = 0, accumulated = 0) =
     idx >= len(data) ? [] :
     get_key(data[idx]) == TRAY ?
         let(eff_base = build_effective_tray_data(data[idx], top_globals))
-        let(count = find_value(eff_base, PRINT_COUNT_N, default = 1))
-        virtual_idx < accumulated + count ?
+        virtual_idx == accumulated ?
             concat([[_LID_ENABLED_B, false]], eff_base) :
-        _grid_item_effective_data(data, top_globals, virtual_idx, idx + 1, accumulated + count) :
+        _grid_item_effective_data(data, top_globals, virtual_idx, idx + 1, accumulated + 1) :
     get_key(data[idx]) == LID ?
-        let(eff_base = build_effective_tray_data(data[idx], top_globals))
-        let(count = find_value(eff_base, PRINT_COUNT_N, default = 1))
-        virtual_idx < accumulated + count ?
+        let(previous_tray = get_previous_tray(data, idx - 1))
+        let(eff_base = build_effective_lid_data(data[idx], previous_tray, top_globals))
+        virtual_idx == accumulated ?
             concat([[_LID_ENABLED_B, true], [_TRAY_ENABLED_B, false]], eff_base) :
-        _grid_item_effective_data(data, top_globals, virtual_idx, idx + 1, accumulated + count) :
+        _grid_item_effective_data(data, top_globals, virtual_idx, idx + 1, accumulated + 1) :
     _grid_item_effective_data(data, top_globals, virtual_idx, idx + 1, accumulated);
 
 function _get_tray_dimensions(effective_data) =
@@ -152,7 +230,8 @@ function _get_row_x_offset_r(data, top_globals, tray_idx, cur, spacing) =
     cur >= tray_idx ? 0 :
     let(eff = _grid_item_effective_data(data, top_globals, cur))
     let(w = _get_tray_total_width(eff))
-    w + spacing + _get_row_x_offset_r(data, top_globals, tray_idx, cur + 1, spacing);
+    w + spacing +
+        _get_row_x_offset_r(data, top_globals, tray_idx, cur + 1, spacing);
 
 function _get_row_max_height(data, top_globals, row, grid_cols, num_trays, col = 0, max_h = 0) =
     let(idx = row * grid_cols + col)
@@ -165,7 +244,33 @@ function _get_col_y_offset(data, top_globals, tray_idx, grid_cols, spacing, num_
     let(target_row = floor(tray_idx / grid_cols))
     row >= target_row ? sum :
     let(row_h = _get_row_max_height(data, top_globals, row, grid_cols, num_trays))
-    _get_col_y_offset(data, top_globals, tray_idx, grid_cols, spacing, num_trays, row + 1, sum + row_h + spacing);
+    // Labels begin 5 mm beyond each panel's positive-Y edge. Reserve enough
+    // preview-only room for the metadata lines, then add another 20 mm between
+    // tray rows. Final geometry keeps the spacing requested by the design.
+    let(row_spacing = is_preview() ? max(spacing, 60) + 20 : spacing)
+    _get_col_y_offset(data, top_globals, tray_idx, grid_cols, spacing, num_trays, row + 1, sum + row_h + row_spacing);
+
+function _get_row_width(data, top_globals, row, grid_cols, spacing, num_items, col = 0, width = 0) =
+    let(idx = row * grid_cols + col)
+    (col >= grid_cols || idx >= num_items) ? width :
+    let(effective_data = _grid_item_effective_data(data, top_globals, idx))
+    let(panel_width = _get_tray_total_width(effective_data))
+    _get_row_width(
+        data,
+        top_globals,
+        row,
+        grid_cols,
+        spacing,
+        num_items,
+        col + 1,
+        width + (col > 0 ? spacing : 0) + panel_width
+    );
+
+function _get_grid_max_width(data, top_globals, grid_cols, spacing, num_items, row = 0, max_width = 0) =
+    let(num_rows = ceil(num_items / grid_cols))
+    row >= num_rows ? max_width :
+    let(row_width = _get_row_width(data, top_globals, row, grid_cols, spacing, num_items))
+    _get_grid_max_width(data, top_globals, grid_cols, spacing, num_items, row + 1, max(max_width, row_width));
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -176,13 +281,56 @@ module Make( DATA = DATA )
     if ( !has_trays(DATA) )
     {
         _MakeSingleTray(DATA);
+
+        if ( is_preview() && !g_make_svg )
+        {
+            _dimensions = _get_tray_dimensions(DATA);
+            _print_count = find_value(DATA, PRINT_COUNT_N, default = 1);
+            _total_height =
+                (_get_effective_tray_height(DATA) + find_value(DATA, G_LID_DEPTH_N, default = 2.6)) *
+                _print_count;
+            _layout_width = _get_tray_total_width(DATA);
+
+            _CreateFullSetPreviewBlock(
+                [_dimensions.x, _dimensions.y, _total_height],
+                _layout_width,
+                _dimensions.y + 60
+            );
+        }
     }
     else
     {
         _top_globals = get_top_level_globals(DATA);
         _num_items = _count_grid_items(DATA, _top_globals);
+        _total_height = _get_total_stack_height(DATA, _top_globals);
+        _set_dimensions_xy = _get_full_set_dimensions_xy(DATA, _top_globals);
         _grid_cols = find_value(DATA, G_GRID_COLUMNS_N, default = 2);
         _tray_spacing = find_value(DATA, G_GRID_SPACING_N, default = 50);
+        _num_rows = ceil(_num_items / _grid_cols);
+        _last_row = _num_rows - 1;
+        _last_row_start = _last_row * _grid_cols;
+        _last_row_y = _get_col_y_offset(
+            DATA,
+            _top_globals,
+            _last_row_start,
+            _grid_cols,
+            _tray_spacing,
+            _num_items
+        );
+        _last_row_height = _get_row_max_height(
+            DATA,
+            _top_globals,
+            _last_row,
+            _grid_cols,
+            _num_items
+        );
+        _layout_width = _get_grid_max_width(
+            DATA,
+            _top_globals,
+            _grid_cols,
+            _tray_spacing,
+            _num_items
+        );
 
         for ( item_idx = [0 : _num_items - 1] )
         {
@@ -193,7 +341,32 @@ module Make( DATA = DATA )
             translate([_x_offset, _y_offset, 0])
                 _MakeSingleTray(_effective_data);
         }
+
+        if ( is_preview() && !g_make_svg )
+            _CreateFullSetPreviewBlock(
+                [_set_dimensions_xy.x, _set_dimensions_xy.y, _total_height],
+                _layout_width,
+                _last_row_y + _last_row_height + 60
+            );
     }
+}
+
+module _CreateFullSetPreviewBlock( dimensions, layout_width, y_offset )
+{
+    label = str("Full Set: ", dimensions.x, " x ", dimensions.y, " x ", dimensions.z, " mm");
+    fitted_label_size = min(10, layout_width * 1.35 / len(label));
+    label_size = max(1.2, fitted_label_size - 2);
+
+    color("black")
+    translate([layout_width / 2, y_offset, 0.01])
+        linear_extrude(height = 0.2)
+            text(
+                label,
+                size = label_size,
+                font = "Liberation Mono:style=Regular",
+                halign = "center",
+                valign = "bottom"
+            );
 }
 
 module _MakeSingleTray( DATA )
@@ -325,6 +498,25 @@ module _MakeSingleTray( DATA )
         get_num_columns(setidx = setidx),
         get_num_rows(setidx = setidx) ];
 
+    function get_total_num_counters( setidx = 0, total = 0 ) =
+        setidx < num_sets ?
+            get_total_num_counters(
+                setidx + 1,
+                total + (is_enabled(setidx) ? get_num_counters(setidx).x * get_num_counters(setidx).y : 0)
+            ) :
+            total;
+
+    function get_counter_sizes_label( setidx = 0, result = "" ) =
+        setidx < num_sets ?
+            is_enabled(setidx) ?
+                let(counter_size = get_counter_size(setidx))
+                get_counter_sizes_label(
+                    setidx + 1,
+                    str(result, result == "" ? "" : " / ", counter_size.x, " x ", counter_size.y)
+                ) :
+                get_counter_sizes_label(setidx + 1, result) :
+            result == "" ? "0x0" : result;
+
     function get_set_size( setidx ) = [
         get_num_counters(setidx).x * get_counter_size_outer(setidx).x + 2*get_counter_margins().x,
         get_num_counters(setidx).y * get_counter_size_outer(setidx).y + 2*get_counter_margins().y
@@ -418,9 +610,66 @@ module _MakeSingleTray( DATA )
         }
     }
 
+    // Preview-only metadata sits 5 mm beyond the positive-Y edge of each panel.
+    // It is intentionally excluded from rendered/exported geometry.
+    if ( is_preview() && !g_make_svg )
+    {
+        if ( make_tray_body )
+            create_preview_panel_label();
+
+        if ( make_lid )
+            place_lid()
+                create_preview_panel_label();
+    }
+
     echo();
 
 ///////////////////////////////////////////
+    module create_preview_panel_label()
+    {
+        tray_name = find_value(DATA, NAME, default = "");
+        print_count = find_value(DATA, PRINT_COUNT_N, default = 1);
+
+        // Liberation Mono keeps the padded metadata fields on one colon
+        // column. The optional tray name is a plain header above them.
+        name_label = tray_name;
+        print_label = str("       Print: ", print_count);
+        counters_label = str("    Counters: ", get_total_num_counters(), " @ ", get_counter_sizes_label(), " mm");
+        tray_label = str("        Tray: ", tray_size_3d.x, " x ", tray_size_3d.y, " x ", tray_size_3d.z, " mm");
+        metadata_labels = [print_label, counters_label, tray_label];
+        labels = tray_name == "" ?
+            metadata_labels :
+            concat([name_label], metadata_labels);
+
+        // Scale long labels to the panel width so metadata remains readable
+        // without extending into neighboring columns.
+        max_chars = max([for (label = labels) len(label)]);
+        fitted_label_size = min(10, tray_size_3d.x * 1.35 / max_chars);
+        label_size = max(1.2, fitted_label_size - 2);
+        line_spacing = label_size * 1.25;
+        character_width = label_size * 0.6;
+        metadata_max_chars = max([for (label = metadata_labels) len(label)]);
+        metadata_x = (tray_size_3d.x - metadata_max_chars * character_width) / 2;
+
+        color("black")
+        translate([0, tray_size_3d.y + 5, 0.01])
+        for (line_idx = [0 : len(labels) - 1])
+            let(is_name_header = tray_name != "" && line_idx == 0)
+            translate([
+                is_name_header ? tray_size_3d.x / 2 : metadata_x,
+                (len(labels) - 1 - line_idx) * line_spacing,
+                0
+            ])
+                linear_extrude(height = 0.2)
+                    text(
+                        labels[line_idx],
+                        size = label_size,
+                        font = "Liberation Mono:style=Regular",
+                        halign = is_name_header ? "center" : "left",
+                        valign = "bottom"
+                    );
+    }
+
     module place_four_mirrored_on_xy( dimensions = [0,0,0])
     {
         translate(dimensions/2)
