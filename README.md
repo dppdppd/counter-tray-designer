@@ -29,6 +29,10 @@ Download portable binaries from the [BGSD Releases](https://github.com/dppdppd/B
 
 OpenSCAD preview shows metadata 5 mm beyond the positive-Y edge of every tray and lid panel: an optional centered tray-name header followed by `Print: N`, `Counters: N @ A x B mm`, and `Tray: C x D x E mm`. Set `[NAME, "Player Aid Counters"]` inside a `TRAY` block to identify that tray; the header displays `Player Aid Counters` without a field prefix. Its lid does not inherit the tray label; a lid shows a header only when its own block supplies `NAME`. Unnamed legacy trays keep the existing three-line block. A separate `Full Set: W x D x H mm` block appears once above the complete preview; its width and depth are the largest panel footprint, and its height is the complete stack of every requested tray copy plus its lids. Preview grid rows reserve room for the per-panel labels plus 20 mm of additional Y clearance between trays. The labels use Liberation Mono with padded field names so their colons and values align. For trays containing multiple counter sizes, the size pairs are separated by slashes on the Counters line. `PRINT_COUNT_N` records how many copies should be printed, but the model contains only one copy of each unique panel so repeated geometry does not clutter the preview or exported file. A lid has its own print quantity and label and otherwise inherits its dimensions and counter layout from the preceding tray.
 
+### Lid thickness
+
+A lid uses the effective tray floor thickness unless `G_LID_DEPTH_N` specifies an override. For example, `[G_FLOOR_THICKNESS_N, 0.4]` gives a 0.4 mm lid. The floor defaults to 1.5 mm. A tray floor override also applies to its following lid. Set `[G_LID_DEPTH_N, 2]` in the lid block for a 2 mm cover. Stack height calculations use the resulting lid thickness.
+
 ## Repository structure
 
 - Default branch: `master`

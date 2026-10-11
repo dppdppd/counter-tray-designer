@@ -1,10 +1,10 @@
 /*
  * Counter Tray Designer
- * Version: 1.0.6
+ * Version: 1.0.7
  * https://github.com/dppdppd/counter-tray-designer
  */
 
-VERSION = "1.0.6";
+VERSION = "1.0.7";
 COPYRIGHT_INFO = "\tCounter Tray Designer\n\thttps://github.com/dppdppd/counter_tray_designer\n\n\tCopyright 2024 Ido Magal\n\tCreative Commons - Attribution - Non-Commercial - Share Alike.\n\thttps://creativecommons.org/licenses/by-nc-sa/4.0/legalcode";
 
 g_make_filler = 0;
@@ -121,6 +121,12 @@ function build_effective_tray_data(tray_entry, top_globals) =
 function build_effective_lid_data(lid_entry, tray_entry, top_globals) =
     concat(get_tray_contents(lid_entry), get_tray_contents_for_lid(tray_entry), top_globals);
 
+// Lids follow the effective tray floor unless an explicit lid depth overrides it.
+// Share this lookup between geometry and both stack-height calculations.
+function _get_effective_lid_depth(data) =
+    find_value(data, G_LID_DEPTH_N,
+        default = find_value(data, G_FLOOR_THICKNESS_N, default = 1.5));
+
 function _get_counter_set(data, set_idx, idx = 0) =
     idx >= len(data) ? [] :
     get_key(data[idx]) == COUNTER_SET && count_keys(data, COUNTER_SET, stop = idx) - 1 == set_idx ?
@@ -161,7 +167,7 @@ function _get_total_stack_height(data, top_globals, idx = 0, total = 0) =
         let(previous_tray = get_previous_tray(data, idx - 1))
         let(effective_data = build_effective_lid_data(data[idx], previous_tray, top_globals))
         let(print_count = find_value(effective_data, PRINT_COUNT_N, default = 1))
-        let(lid_depth = find_value(effective_data, G_LID_DEPTH_N, default = 2.6))
+        let(lid_depth = _get_effective_lid_depth(effective_data))
         _get_total_stack_height(data, top_globals, idx + 1, total + lid_depth * print_count) :
     _get_total_stack_height(data, top_globals, idx + 1, total);
 
@@ -287,7 +293,7 @@ module Make( DATA = DATA )
             _dimensions = _get_tray_dimensions(DATA);
             _print_count = find_value(DATA, PRINT_COUNT_N, default = 1);
             _total_height =
-                (_get_effective_tray_height(DATA) + find_value(DATA, G_LID_DEPTH_N, default = 2.6)) *
+                (_get_effective_tray_height(DATA) + _get_effective_lid_depth(DATA)) *
                 _print_count;
             _layout_width = _get_tray_total_width(DATA);
 
@@ -416,7 +422,7 @@ module _MakeSingleTray( DATA )
     _padding_min_x = tray_min_padding_raw.x >= magnet_outer_diameter ? tray_min_padding_raw.x : magnet_outer_diameter;
     tray_padding = [ frame_style >= 3 ? tray_min_padding_raw.x : _padding_min_x, tray_min_padding_raw.y ];
 
-    lid_depth = find_value( DATA, G_LID_DEPTH_N, default = 2.6);
+    lid_depth = _get_effective_lid_depth(DATA);
     function get_counter_margins_default() = find_value( DATA, COUNTER_MARGINS_XY, default = [0.5,0.5]);
     g_counter_shape = find_value( DATA, COUNTER_SHAPE, default = SHAPE_SQUARE);
     g_counter_margins_post_length_fraction = find_value( DATA, COUNTER_MARGINS_POST_LENGTH_FRACTION_N, default = 0.25);
