@@ -1,10 +1,10 @@
 /*
  * Counter Tray Designer
- * Version: 1.0.7
+ * Version: 1.0.8
  * https://github.com/dppdppd/counter-tray-designer
  */
 
-VERSION = "1.0.7";
+VERSION = "1.0.8";
 COPYRIGHT_INFO = "\tCounter Tray Designer\n\thttps://github.com/dppdppd/counter_tray_designer\n\n\tCopyright 2024 Ido Magal\n\tCreative Commons - Attribution - Non-Commercial - Share Alike.\n\thttps://creativecommons.org/licenses/by-nc-sa/4.0/legalcode";
 
 g_make_filler = 0;
@@ -121,11 +121,11 @@ function build_effective_tray_data(tray_entry, top_globals) =
 function build_effective_lid_data(lid_entry, tray_entry, top_globals) =
     concat(get_tray_contents(lid_entry), get_tray_contents_for_lid(tray_entry), top_globals);
 
-// Lids follow the effective tray floor unless an explicit lid depth overrides it.
+// Lids follow the full tray height unless an explicit lid depth overrides it.
 // Share this lookup between geometry and both stack-height calculations.
 function _get_effective_lid_depth(data) =
     find_value(data, G_LID_DEPTH_N,
-        default = find_value(data, G_FLOOR_THICKNESS_N, default = 1.5));
+        default = _get_effective_tray_height(data));
 
 function _get_counter_set(data, set_idx, idx = 0) =
     idx >= len(data) ? [] :
@@ -134,7 +134,7 @@ function _get_counter_set(data, set_idx, idx = 0) =
         _get_counter_set(data, set_idx, idx + 1);
 
 // A tray's printable height is the deepest enabled counter set plus its floor
-// and any required pedestal height. This mirrors _MakeSingleTray's Z sizing.
+// and any required pedestal height. Geometry and lid defaults share this value.
 function _get_effective_tray_height(effective_data, set_idx = 0, max_height = 0) =
     let(num_sets = count_keys(effective_data, COUNTER_SET))
     let(floor_thickness = find_value(effective_data, G_FLOOR_THICKNESS_N, default = 1.5))
@@ -435,7 +435,7 @@ module _MakeSingleTray( DATA )
     tray_size_3d = [
         tray_size_raw.x,
         tray_size_raw.y,
-        max(get_tray_size_z(), _floor_thickness)
+        _get_effective_tray_height(DATA)
     ];
 
      usable_area = [
@@ -445,14 +445,6 @@ module _MakeSingleTray( DATA )
 
     all_sets_y_offset = 
         ( tray_size_3d.y - get_all_sets_size_y() )/2;
-
-        function get_tray_size_z( setidx = 0, max_z = 0 ) =
-            setidx < num_sets ?
-            let( ped_min = use_counter_pedestals(setidx) ? get_counter_pedestal_min(setidx) : 0  )
-            let( needed_floor =  _floor_thickness + ped_min )
-            get_tray_size_z( setidx + 1, max( max_z, get_counter_size(setidx).z + needed_floor)) :
-            max_z;
-
 
     function get_set_floor_thickness(setidx) = 
          tray_size_3d.z - get_counter_size(setidx).z;

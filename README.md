@@ -31,7 +31,7 @@ OpenSCAD preview shows metadata 5 mm beyond the positive-Y edge of every tray an
 
 ### Lid thickness
 
-A lid uses the effective tray floor thickness unless `G_LID_DEPTH_N` specifies an override. For example, `[G_FLOOR_THICKNESS_N, 0.4]` gives a 0.4 mm lid. The floor defaults to 1.5 mm. A tray floor override also applies to its following lid. Set `[G_LID_DEPTH_N, 2]` in the lid block for a 2 mm cover. Stack height calculations use the resulting lid thickness.
+A lid uses the full tray thickness unless `G_LID_DEPTH_N` specifies an override. Tray thickness includes the floor, deepest enabled counter set, and any required pedestal height. For example, 1.2 mm counters above a 0.6 mm floor give a 1.8 mm tray and lid. Disabled counter sets do not increase thickness. Set `[G_LID_DEPTH_N, 2]` in the lid block for a 2 mm cover. Stack height calculations use the resulting lid thickness.
 
 ## Repository structure
 

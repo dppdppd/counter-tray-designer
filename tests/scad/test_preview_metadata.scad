@@ -43,8 +43,8 @@ assert(find_value(TEST_PREVIEW_LID, G_DIMENSIONS_XY) == [44, 32],
     "Lid must inherit dimensions from its preceding tray");
 assert(find_value(TEST_PREVIEW_LID, PRINT_COUNT_N, default = 1) == 1,
     "Lid must not inherit the tray print quantity");
-assert(abs(TEST_PREVIEW_TOTAL_HEIGHT - 17) < 0.001,
-    "Total height must include three 5 mm trays and one 2 mm lid that follows the floor");
+assert(abs(TEST_PREVIEW_TOTAL_HEIGHT - 20) < 0.001,
+    "Total height must include three 5 mm trays and one 5 mm lid that follows the tray");
 assert(TEST_PREVIEW_SET_XY == [44, 32],
     "Full-set footprint must use the widest and deepest panel dimensions");
 
